@@ -18,3 +18,6 @@ Thumbs.db
 *.qasm
 # blpkg registry cache
 .blpkg/
+
+# taste preview
+hello_taste.bl
