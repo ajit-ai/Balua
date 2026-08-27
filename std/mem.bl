@@ -1,0 +1,2 @@
+// std::mem
+module std::mem { pub fn size_of<T>() -> usize { 0 } pub fn align_of<T>() -> usize { 1 } pub fn transmute<A,B>(x: A) -> B { loop {} } }

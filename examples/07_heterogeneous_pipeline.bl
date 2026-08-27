@@ -1,0 +1,28 @@
+// 07_heterogeneous_pipeline — CPU→GPU→NPU→CPU in ONE program (Section 11)
+module main {
+    use std::hal::gpu::DeviceBuf;
+    use std::hal::npu::NpuModel;
+
+    fn preprocess_cpu(data: &[f32]) -> Vec<f32> { data.to_vec() }
+
+    @hw::gpu(backend=cuda, sm=90)
+    kernel fn preprocess_gpu(buf: &[f32], out: &mut [f32], n: u32) -> void {
+        let i = thread_id::x();
+        out[i] = buf[i] * 2.0;
+    }
+
+    @hw::npu(backend=onnx)
+    tensor fn run_npu(x: Tensor<f32, [1, 1024]>) -> Tensor<f32, [1, 10]> { Tensor{data:[0.0;10]} }
+
+    fn postprocess_cpu(t: Tensor<f32, [1,10]>) -> i32 { 0 }
+
+    fn main() -> i32 {
+        let raw = vec![1.0; 1024];
+        let cpu_pre = preprocess_cpu(&raw);
+        let gpu_buf = DeviceBuf::alloc(1024); // move_to_device in real code
+        let npu_out = run_npu(Tensor{data:[0.0;1024]});
+        let ans = postprocess_cpu(npu_out);
+        println("Heterogeneous pipeline result: {}", ans);
+        0
+    }
+}

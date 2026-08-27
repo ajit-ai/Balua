@@ -1,0 +1,15 @@
+// std::hal::memory — Memory HAL (Section 4.1)
+module std::hal::memory {
+    pub trait Allocator { fn alloc(&mut self, size: usize) -> *mut u8; fn dealloc(&mut self, ptr: *mut u8, size: usize); }
+    pub struct StackAlloc { base: usize }
+    pub struct HeapAlloc;
+    pub struct ArenaAlloc { arena: *mut u8, offset: usize }
+    pub struct SlabAlloc { slab_size: usize }
+    pub struct DmaAlloc;
+
+    pub fn mmap(size: usize) -> *mut u8 { 0 as *mut u8 }
+    pub fn munmap(ptr: *mut u8, size: usize) { }
+    pub fn mprotect(ptr: *mut u8, size: usize, prot: u32) -> i32 { 0 }
+    pub fn alloc_hugepage(size: usize) -> *mut u8 { mmap(size) }
+    pub fn alloc_on_node(node: usize, size: usize) -> *mut u8 { mmap(size) }
+}
