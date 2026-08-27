@@ -1,12 +1,13 @@
-//! baluac — Balua compiler driver (Section 2)
-//! Usage: baluac [--emit-llvm] [--target <triple>] <file.bl>
+//! balua — Balua compiler driver (Section 2) — Windows balua.exe
+//! Usage: balua hello.bl  |  balua --help  |  balua [--emit-llvm] <file.bl>
+//! Legacy alias baluac.exe still works. Package manager is BPM.exe.
 
 use baluac_lib::{diagnostics::*, lexer::Lexer, mir::MirBuilder, parser::Parser, semantic::SemanticAnalyzer};
 use clap::Parser as ClapParser;
 use std::path::PathBuf;
 
 #[derive(ClapParser, Debug)]
-#[command(name = "baluac", version, about = "Balua system programming language compiler")]
+#[command(name = "balua", version, about = "Balua system programming language compiler — balua.exe (Windows 11). Package manager: BPM.exe. Legacy alias: baluac.exe")]
 struct Args {
     /// Input Balua source files (.bl)
     #[arg(required = true)]
@@ -94,7 +95,9 @@ fn main() -> anyhow::Result<()> {
             std::process::exit(1);
         }
     } else if !args.emit_llvm && !args.emit_mir {
-        println!("baluac: compilation successful ({} files, target: {})", args.files.len(), args.target);
+        // Windows: balua hello.bl  (as requested)
+        let exe = std::env::current_exe().ok().and_then(|p| p.file_name().map(|n| n.to_string_lossy().into_owned())).unwrap_or("balua".into());
+        println!("{}: compilation successful ({} files, target: {})", exe.trim_end_matches(".exe"), args.files.len(), args.target);
     }
 
     Ok(())

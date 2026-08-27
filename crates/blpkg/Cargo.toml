@@ -2,7 +2,15 @@
 name = "blpkg"
 version.workspace = true
 edition.workspace = true
-description = "Balua package manager — PubGrub resolver, builder, registry client"
+description = "Balua Package Manager — BPM.exe (PubGrub resolver, builder, registry client)"
+
+[[bin]]
+name = "BPM"
+path = "src/main.rs"
+
+[[bin]]
+name = "blpkg"
+path = "src/main.rs"
 
 [dependencies]
 clap.workspace = true

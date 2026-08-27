@@ -2,7 +2,11 @@
 name = "baluac"
 version.workspace = true
 edition.workspace = true
-description = "Balua compiler — frontend, MIR, and heterogeneous backends"
+description = "Balua compiler — frontend, MIR, and heterogeneous backends (balua.exe driver)"
+
+[[bin]]
+name = "balua"
+path = "src/main.rs"
 
 [[bin]]
 name = "baluac"
