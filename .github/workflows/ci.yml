@@ -1,0 +1,21 @@
+name: CI
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo build --workspace
+      - run: cargo test --workspace
+      - run: cargo run -p baluac -- examples/01_hello_hardware.bl --emit-mir --json-diagnostics
+  blpkg:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo run -p blpkg -- build
+      - run: cargo run -p blpkg -- test

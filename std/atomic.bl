@@ -1,0 +1,2 @@
+// std::atomic — AtomicBool, AtomicU64, fence
+module std::atomic { pub struct AtomicBool; pub struct AtomicU64; pub fn fence() {} }

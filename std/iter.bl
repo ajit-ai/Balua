@@ -1,0 +1,2 @@
+// std::iter — Iterator, map, filter, fold, zip
+module std::iter { pub trait Iterator {} }

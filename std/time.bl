@@ -1,0 +1,2 @@
+// std::time — Instant, Duration, SystemTime
+module std::time { pub struct Instant; pub struct Duration; }
