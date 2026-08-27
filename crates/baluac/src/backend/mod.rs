@@ -2,6 +2,7 @@
 //! Backend selection driven by @hw:: annotations. Mixed-hardware programs
 //! compile each annotated region to its backend; baluald stitches objects.
 
+pub mod cranelift;
 pub mod hls;
 pub mod llvm;
 pub mod mlir_dialect;
@@ -19,6 +20,7 @@ pub trait Backend {
 pub fn select_backend(hw: &str) -> Box<dyn Backend> {
     match hw {
         "llvm" | "cpu" => Box::new(llvm::LlvmBackend::default()),
+        "cranelift" | "clif" => Box::new(cranelift::CraneliftBackend::default()),
         "ptx" | "cuda" => Box::new(ptx::PtxBackend::default()),
         "spirv" | "vulkan" => Box::new(spirv::SpirvBackend::default()),
         "hls" | "fpga" => Box::new(hls::HlsBackend::default()),
