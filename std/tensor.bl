@@ -1,0 +1,2 @@
+// std::tensor — unified CPU/GPU/NPU tensor
+module std::tensor { pub struct Tensor<T, Shape> { data: [T; 0] } }
