@@ -1,0 +1,24 @@
+// 10_balua_os_kernel — Minimal Balua-native kernel (Section 11)
+#![no_std]
+
+module kernel {
+    use std::hal::memory::{mmap, HeapAlloc};
+
+    struct PageAllocator { next: usize }
+    impl PageAllocator {
+        fn alloc_page(&mut self) -> *mut u8 { let p = self.next as *mut u8; self.next += 4096; p }
+    }
+
+    struct Scheduler { tasks: [u32; 16] }
+    impl Scheduler {
+        fn schedule(&mut self) { /* round-robin */ }
+    }
+
+    pub fn syscall_table(id: u32) -> i32 { 0 }
+
+    fn kmain() -> ! {
+        let mut alloc = PageAllocator { next: 0x100000 };
+        let page = alloc.alloc_page();
+        loop { }
+    }
+}

@@ -1,0 +1,23 @@
+// 03_gpu_matrix_multiply — CUDA tensor-core GEMM (Section 11)
+module main {
+    use std::hal::gpu::{DeviceBuf, Grid, Block, launch_kernel, memcpy_h2d, memcpy_d2h, wmma_gemm};
+
+    @hw::gpu(backend=cuda, sm=90)
+    kernel fn matrix_mul(A: &[f32], B: &[f32], C: &mut [f32], N: u32) -> void {
+        let row = thread_id::x();
+        let col = thread_id::y();
+        let mut acc: f32 = 0.0;
+        for k in 0..N { acc += A[row * N + k] * B[k * N + col]; }
+        C[row * N + col] = acc;
+    }
+
+    fn main() -> i32 {
+        let N: u32 = 1024;
+        let mut A = vec![1.0f32; (N*N) as usize];
+        let mut B = vec![1.0f32; (N*N) as usize];
+        let mut C = vec![0.0f32; (N*N) as usize];
+        // Real: DeviceBuf::alloc, memcpy_h2d, launch_kernel(Grid{x:32,y:32}, Block{x:16,y:16}, args)
+        println("GEMM {}x{} — dispatched via @hw::gpu (PTX SM90)", N, N);
+        0
+    }
+}

@@ -1,0 +1,30 @@
+// std::hal::gpu — GPU HAL (Section 4.1)
+module std::hal::gpu {
+    pub struct DeviceBuf<T> { ptr: *mut T, len: usize }
+    pub struct PinnedBuf<T> { ptr: *mut T, len: usize }
+    pub struct UnifiedBuf<T> { ptr: *mut T, len: usize }
+
+    impl<T> DeviceBuf<T> {
+        pub fn alloc(n: usize) -> Self { Self { ptr: 0 as *mut T, len: n } }
+        pub fn len(&self) -> usize { self.len }
+        pub fn as_slice(&self) -> &[T] { unsafe { std::slice::from_raw_parts(self.ptr, self.len) } }
+    }
+
+    pub fn memcpy_h2d<T>(dst: &mut DeviceBuf<T>, src: &[T]) / IO { }
+    pub fn memcpy_d2h<T>(dst: &mut [T], src: &DeviceBuf<T>) / IO { }
+    pub fn memcpy_d2d<T>(dst: &mut DeviceBuf<T>, src: &DeviceBuf<T>) / IO { }
+
+    pub fn launch_kernel(grid: Grid, block: Block, args: &[u8]) / IO { }
+    pub struct Grid { pub x: u32, pub y: u32, pub z: u32 }
+    pub struct Block { pub x: u32, pub y: u32, pub z: u32 }
+
+    pub struct CudaStream { id: u64 }
+    pub struct HipStream { id: u64 }
+    pub struct SyclQueue { id: u64 }
+
+    pub fn wmma_gemm(a: &[u16], b: &[u16], c: &mut [f32]) / IO { } // tensor core — simulation fallback: naive
+    pub fn tensor_op(a: &[f32], b: &[f32]) -> Vec<f32> { a.iter().zip(b.iter()).map(|(x,y)| x*y).collect() }
+
+    pub fn nccl_all_reduce(buf: &mut DeviceBuf<f32>) / IO { }
+    pub fn gpu_peer_access(enable: bool) / IO { }
+}

@@ -1,0 +1,35 @@
+// std::hal::cpu — CPU HAL (Section 4.1)
+// SIMD: AVX-512, NEON, SVE, RVV; cache control; atomics; topology; real-time
+
+module std::hal::cpu {
+    use std::mem::Allocator;
+
+    // SIMD intrinsics — zero-cost, lowered to LLVM intrinsics / inline asm
+    pub fn prefetch(ptr: *const u8) / Pure { /* llvm.prefetch */ }
+    pub fn flush_cache(ptr: *const u8, len: usize) / IO { }
+    pub fn clflushopt(ptr: *const u8) / IO { }
+
+    pub struct AtomicU64 { inner: u64 }
+    impl AtomicU64 {
+        pub fn new(v: u64) -> Self { Self { inner: v } }
+        pub fn load(&self, ord: Ordering) -> u64 { self.inner }
+        pub fn store(&mut self, v: u64, ord: Ordering) { self.inner = v; }
+    }
+    pub enum Ordering { Relaxed, Acquire, Release, SeqCst }
+    pub fn fence(ord: Ordering) { }
+
+    pub fn core_count() -> usize { 1 } // simulation fallback
+    pub fn numa_node() -> usize { 0 }
+    pub fn cache_line_size() -> usize { 64 }
+
+    pub fn set_thread_affinity(core: usize) / IO { }
+    pub fn set_priority(p: RtPriority) / IO { }
+    pub enum RtPriority { Normal, High, Realtime }
+
+    // v128/v256/v512 — mapped to std::simd
+    pub type v128<T> = [T; 4];
+    pub type v256<T> = [T; 8];
+    pub type v512<T> = [T; 16];
+
+    // no_std compatible: all functions have simulation fallback (return dummy)
+}

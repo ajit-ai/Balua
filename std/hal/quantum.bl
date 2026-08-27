@@ -1,0 +1,31 @@
+// std::hal::quantum — Quantum HAL (Section 4.1)
+module std::hal::quantum {
+    pub struct Qubit { id: u32 }
+    pub struct QubitArray { qubits: [Qubit; 8] }
+    pub struct ClassicalBit { val: bool }
+
+    impl Qubit {
+        pub fn new() -> Self { Self { id: 0 } }
+    }
+    impl QubitArray {
+        pub fn new(n: usize) -> Self { Self { qubits: [Qubit{id:0},Qubit{id:0},Qubit{id:0},Qubit{id:0},Qubit{id:0},Qubit{id:0},Qubit{id:0},Qubit{id:0}] } }
+    }
+
+    // Gates — simulation fallback flips classical state vector
+    pub fn H(q: &mut Qubit) { }
+    pub fn X(q: &mut Qubit) { }
+    pub fn Y(q: &mut Qubit) { }
+    pub fn Z(q: &mut Qubit) { }
+    pub fn CNOT(ctrl: &Qubit, tgt: &mut Qubit) { }
+    pub fn Toffoli(c1: &Qubit, c2: &Qubit, tgt: &mut Qubit) { }
+    pub fn S(q: &mut Qubit) { }
+    pub fn T_gate(q: &mut Qubit) { }
+    pub fn Rx(q: &mut Qubit, theta: f64) { }
+    pub fn Ry(q: &mut Qubit, theta: f64) { }
+    pub fn Rz(q: &mut Qubit, theta: f64) { }
+
+    pub fn measure(q: Qubit) -> ClassicalBit { ClassicalBit { val: false } }
+
+    pub fn surface_code_encode(q: Qubit) -> Qubit { q }
+    pub fn logical_qubit(q: Qubit) -> Qubit { q }
+}

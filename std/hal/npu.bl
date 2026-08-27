@@ -1,0 +1,19 @@
+// std::hal::npu — NPU HAL (Section 4.1)
+module std::hal::npu {
+    pub struct NpuModel { path: str }
+    pub struct Tensor<T, const N: usize> { data: [T; N] }
+
+    impl NpuModel {
+        pub fn load_onnx(path: str) -> Result<Self, str> { Ok(Self { path }) }
+        pub fn load_tflite(path: str) -> Result<Self, str> { Ok(Self { path }) }
+        pub fn infer<T>(&self, input: Tensor<T, 150528>) -> Tensor<f32, 1000> { Tensor { data: [0.0; 1000] } }
+        pub fn infer_async<T>(&self, input: Tensor<T, 150528>) -> Future<Tensor<f32, 1000>> { Future::ready(Tensor { data: [0.0; 1000] }) }
+    }
+
+    pub fn quantize_int8<T>(t: Tensor<T, 1000>) -> Tensor<i8, 1000> { Tensor { data: [0; 1000] } }
+    pub fn quantize_fp16<T>(t: Tensor<T, 1000>) -> Tensor<f16, 1000> { Tensor { data: [0 as f16; 1000] } }
+
+    // Backends auto-detected via runtime probe (simulation fallback always succeeds)
+    pub enum NpuBackend { QualcommHtp, AppleAne, IntelNpu, SamsungNpu, MediaTekApu, Sim }
+    pub fn detect_backend() -> NpuBackend { NpuBackend::Sim }
+}

@@ -1,0 +1,2 @@
+// std::collections
+module std::collections { pub struct Vec<T> { data: [T; 0] } pub struct HashMap<K,V> {} pub struct BTreeMap<K,V> {} }

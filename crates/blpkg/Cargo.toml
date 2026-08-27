@@ -1,0 +1,16 @@
+[package]
+name = "blpkg"
+version.workspace = true
+edition.workspace = true
+description = "Balua package manager — PubGrub resolver, builder, registry client"
+
+[dependencies]
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+log.workspace = true
+env_logger.workspace = true
+toml = "0.8"
+semver = "1.0"

@@ -1,0 +1,70 @@
+(* Balua EBNF — Section 3.1, 12 Chapter 15 *)
+(* LL(k) unambiguous grammar, rejects invalid @hw:: at parse time *)
+
+Program         ::= { Module } ;
+Module          ::= "module" Ident "{" { Item } "}" ;
+Item            ::= UseDecl | FnDecl | StructDecl | EnumDecl | TraitDecl | ImplDecl
+                  | HardwareBlock | KernelDecl | CircuitDecl | QuantumBlock
+                  | VarDecl | FFIDecl | UnsafeBlock ;
+UseDecl         ::= "use" Path ";" ;
+FnDecl          ::= [ "async" ] [ ExternABI ] "fn" Ident [ Generics ] "(" [ ParamList ] ")" [ "->" Type ] [ HardwareAnnot ] ( Block | ";" ) ;
+ParamList       ::= Param { "," Param } ;
+Param           ::= [ "mut" ] Ident ":" Type ;
+HardwareAnnot   ::= "@hw::" ( "cpu" | "gpu" | "npu" | "fpga" | "quantum" | "embedded" ) [ "(" HwParams ")" ] ;
+HwParams        ::= HwParam { "," HwParam } ;
+HwParam         ::= Ident "=" Literal ;
+KernelDecl      ::= HardwareAnnot "kernel" "fn" Ident "(" [ ParamList ] ")" "->" "void" Block ;
+CircuitDecl     ::= HardwareAnnot "circuit" "fn" Ident "(" ParamList ")" "->" Type Block ;
+QuantumBlock    ::= HardwareAnnot "fn" Ident "(" [ ParamList ] ")" "->" Type Block ;
+
+Type            ::= Primitive | HardwareType | RefType | PtrType | SliceType | ArrayType | TensorType | SimdType | QubitType | StreamType | FnType | GenericType ;
+Primitive       ::= "i8" | "i16" | "i32" | "i64" | "i128" | "u8" | "u16" | "u32" | "u64" | "u128"
+                  | "f16" | "f32" | "f64" | "f128" | "bool" | "char" | "usize" | "isize" | "str" ;
+HardwareType    ::= "fp16" | "bf16" | "tf32" ;
+RefType         ::= "&" [ Lifetime ] [ "mut" ] Type ;
+PtrType         ::= "*" [ "mut" | "const" ] Type ;
+SliceType       ::= "[" Type "]" | "&" "[" Type "]" ;
+ArrayType       ::= "[" Type ";" LiteralInt "]" ;
+TensorType      ::= "Tensor" "<" Type "," "[" DimList "]" ">" ;
+DimList         ::= LiteralInt { "," LiteralInt } ;
+SimdType        ::= "v128" "<" Type ">" | "v256" "<" Type ">" | "v512" "<" Type ">" ;
+QubitType       ::= "qubit" [ "[" LiteralInt "]" ] ;
+StreamType      ::= "stream" "<" Type ">" ;
+FnType          ::= "fn" "(" [ TypeList ] ")" "->" Type ;
+GenericType     ::= Ident [ "<" TypeList ">" ] ;
+TypeList        ::= Type { "," Type } ;
+
+Block           ::= "{" { Stmt } "}" ;
+Stmt            ::= LetStmt | ExprStmt | ReturnStmt | AssignStmt ;
+LetStmt         ::= "let" [ "mut" ] Ident [ ":" Type ] [ "=" Expr ] ";" ;
+ReturnStmt      ::= "return" [ Expr ] ";" ;
+AssignStmt      ::= Expr "=" Expr ";" ;
+ExprStmt        ::= Expr ";" ;
+
+Expr            ::= BorrowExpr | OwnershipExpr | Literal | Ident | CallExpr | BinaryExpr | Block | UnsafeBlock | IfExpr | MatchExpr ;
+BorrowExpr      ::= "&" [ "mut" ] Expr ;
+OwnershipExpr   ::= "box" "<" Type ">" "::" "new" "(" Expr ")" | Expr "." "move_to_device" "(" ")" ;
+CallExpr        ::= Expr "(" [ ArgList ] ")" ;
+ArgList         ::= Expr { "," Expr } ;
+BinaryExpr      ::= Expr BinOp Expr ;
+BinOp           ::= "+" | "-" | "*" | "/" | "%" | "==" | "!=" | "<" | ">" | "<=" | ">=" | "&&" | "||" | "&" | "|" | "^" | "<<" | ">>" ;
+IfExpr          ::= "if" Expr Block [ "else" ( Block | IfExpr ) ] ;
+MatchExpr       ::= "match" Expr "{" { MatchArm } "}" ;
+MatchArm        ::= Pattern "=>" Expr "," ;
+Pattern         ::= Ident | Literal | "_" | Pattern "|" Pattern ;
+
+StructDecl      ::= "struct" Ident [ Generics ] "{" { Field } "}" ;
+Field           ::= Ident ":" Type "," ;
+EnumDecl        ::= "enum" Ident "{" { Variant } "}" ;
+Variant         ::= Ident [ "(" TypeList ")" ] "," ;
+TraitDecl       ::= "trait" Ident "{" { FnDecl } "}" ;
+ImplDecl        ::= "impl" [ Ident "for" ] Ident "{" { FnDecl } "}" ;
+Generics        ::= "<" Ident { "," Ident } ">" ;
+Lifetime        ::= "'" Ident ;
+ExternABI       ::= "extern" StringLiteral ;
+FFIDecl         ::= ExternABI "fn" Ident "(" [ ParamList ] ")" [ "->" Type ] ";" ;
+UnsafeBlock     ::= "unsafe" Block ;
+
+Ident           ::= UnicodeIdent ;
+Literal         ::= LiteralInt | LiteralFloat | LiteralStr | LiteralBool ;
+(* Lexical: Unicode UTF-8 identifiers, @hw:: hardware directives are first-class tokens, #[...] annotations *)
