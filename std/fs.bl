@@ -1,0 +1,2 @@
+// std::fs — Filesystem
+module std::fs { pub fn read(path: str) -> Vec<u8> { vec![] } pub fn write(path: str, data: &[u8]) {} }

@@ -1,0 +1,2 @@
+// std::future — Future, async/await, executor
+module std::future { pub trait Future {} }
