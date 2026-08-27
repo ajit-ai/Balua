@@ -1,0 +1,15 @@
+# Low-memory preset for 4GB RAM / i7 (see GIT_WORKFLOW.md)
+# Limits parallel jobs and enables incremental to avoid OOM on Windows
+[build]
+jobs = 2
+incremental = true
+
+[profile.dev]
+codegen-units = 16
+debug = 1
+incremental = true
+
+[profile.release]
+# Keep release lean on 4GB host; use blpkg --release only when needed
+codegen-units = 16
+lto = "thin"
