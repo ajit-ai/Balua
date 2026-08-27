@@ -2,7 +2,7 @@
 //! Usage: balua hello.bl  |  balua --help  |  balua [--emit-llvm] <file.bl>
 //! Legacy alias baluac.exe still works. Package manager is BPM.exe.
 
-use baluac_lib::{diagnostics::*, lexer::Lexer, mir::MirBuilder, parser::Parser, semantic::SemanticAnalyzer};
+use baluac_lib::{diagnostics::*, lexer::Lexer, mir::MirBuilder, parser::Parser, semantic::SemanticAnalyzer, backend::Backend};
 use clap::Parser as ClapParser;
 use std::path::PathBuf;
 
@@ -28,6 +28,14 @@ struct Args {
     /// Hardware backend override
     #[arg(long)]
     backend: Option<String>,
+
+    /// CPU backend: llvm (default release, LTO) or cranelift (fast debug, 4GB host)
+    #[arg(long, default_value = "llvm")]
+    cpu_backend: String,
+
+    /// Emit Cranelift IR (.clif) — lightweight alternative to LLVM
+    #[arg(long)]
+    emit_clif: bool,
 
     /// JSON diagnostics for IDE
     #[arg(long)]
@@ -68,13 +76,19 @@ fn main() -> anyhow::Result<()> {
             println!("{}", MirBuilder::to_json(&mir));
         }
         if args.emit_llvm {
-            println!("; LLVM IR stub for {} (target: {})", file_str, args.target);
-            for m in &mir {
-                for f in &m.functions {
-                    println!("define void @{}() {{", f.name);
-                    println!("  ret void");
-                    println!("}}");
-                }
+            let be = baluac_lib::backend::llvm::LlvmBackend { target_triple: args.target.clone(), opt_level: 2, lto: true, ..Default::default() };
+            println!("{}", be.lower(&mir).unwrap());
+        }
+        if args.emit_clif {
+            let be = baluac_lib::backend::cranelift::CraneliftBackend { target_triple: args.target.clone(), opt_level: 0 };
+            println!("{}", be.lower(&mir).unwrap());
+        }
+        if args.backend.is_some() {
+            let hw = args.backend.as_deref().unwrap();
+            let be = baluac_lib::backend::select_backend(hw);
+            // Emit selected backend to stdout for inspection (balua --backend ptx hello.bl)
+            if !args.emit_llvm && !args.emit_clif && !args.emit_mir {
+                println!("{}", be.lower(&mir).unwrap());
             }
         }
 
