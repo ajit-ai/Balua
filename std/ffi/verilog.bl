@@ -1,0 +1,6 @@
+// std::ffi — C FFI (Section 9.1)
+module std::ffi::c {
+    pub type CStr = str;
+    pub type CString = str;
+    // extern "C" fn memcpy etc. declared via `extern "C" { fn memcpy(...); }`
+}

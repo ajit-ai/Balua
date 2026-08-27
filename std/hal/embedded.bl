@@ -1,0 +1,24 @@
+// std::hal::embedded — Embedded HAL (Section 4.1)
+module std::hal::embedded {
+    pub struct Pin { port: u8, pin: u8, is_output: bool }
+    impl Pin {
+        pub fn new(port: u8, pin: u8) -> Self { Self { port, pin, is_output: false } }
+        pub fn output(self) -> Self { Self { is_output: true, ..self } }
+        pub fn set_high(&mut self) / IO { }
+        pub fn set_low(&mut self) / IO { }
+    }
+
+    pub struct Uart { baud: u32 }
+    pub struct Spi { freq_hz: u32 }
+    pub struct I2c { addr: u8 }
+    pub struct Can { bitrate: u32 }
+
+    pub fn irq_attach(irq: u32, handler: fn() -> void) / IO { }
+    pub fn dma_transfer(src: *const u8, dst: *mut u8, len: usize) / IO { }
+
+    pub struct Watchdog;
+    impl Watchdog {
+        pub fn start(timeout_ms: u32) / IO -> Self { Self }
+        pub fn feed(&mut self) / IO { }
+    }
+}
