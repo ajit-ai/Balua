@@ -1,0 +1,5 @@
+# balua-fmt configuration (Section 8.1)
+max_width = 100
+tab_spaces = 4
+hardware_annotation_align = true
+preserve_pragma_directives = true

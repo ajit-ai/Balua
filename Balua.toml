@@ -1,0 +1,31 @@
+# Balua package manifest — example project
+# This file demonstrates the Balua.toml spec (Section 7)
+
+[package]
+name = "hello_hardware"
+version = "0.1.0"
+authors = ["Balua Team <team@balua-lang.org>"]
+edition = "2026"
+description = "Hello Hardware — first Balua program detecting all silicon"
+license = "MIT OR Apache-2.0"
+
+[hardware]
+cpu = { arch = "x86_64", features = ["avx512"] }
+gpu = { backend = "cuda", min_sm = "sm_70" }
+npu = { backend = "onnx", quantization = "int8" }
+fpga = { vendor = "xilinx", part = "xcvu9p" }
+quantum = { backend = "openqasm3", simulator = "aer" }
+
+[dependencies]
+# balua-tensor = "1.2.0"
+# balua-cuda = "0.9.0"
+
+[profile.debug]
+opt_level = 0
+debug = true
+
+[profile.release]
+opt_level = 3
+lto = true
+codegen_units = 1
+panic = "abort"
