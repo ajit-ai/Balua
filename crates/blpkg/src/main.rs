@@ -1,6 +1,7 @@
-//! blpkg — Balua package manager (Section 7.1)
+//! BPM — Balua Package Manager (BPM.exe) — Section 7.1
 //! Implements PubGrub resolver, builder, registry client. Commands:
 //! new, build, run, test, bench, add, publish, doc, fmt, lint, cross
+//! Legacy alias blpkg.exe still works.
 
 use clap::{Parser, Subcommand};
 use anyhow::Result;
@@ -10,7 +11,7 @@ mod builder;
 mod registry;
 
 #[derive(Parser)]
-#[command(name="blpkg", version, about="Balua package manager")]
+#[command(name="BPM", version, about="BPM — Balua Package Manager (BPM.exe, Windows 11). Legacy alias: blpkg.exe")]
 struct Cli {
     #[command(subcommand)]
     cmd: Cmd,
