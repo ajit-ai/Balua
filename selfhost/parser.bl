@@ -1,0 +1,2 @@
+fn parse_fn(name: str) -> i32 { 0 }
+fn parse_program(src: str) -> i32 { parse_fn(src) }
