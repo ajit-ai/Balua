@@ -9,6 +9,7 @@ use anyhow::Result;
 mod resolver;
 mod builder;
 mod registry;
+mod bom;
 
 #[derive(Parser)]
 #[command(name="BPM", version, about="BPM — Balua Package Manager (BPM.exe, Windows 11). Legacy alias: blpkg.exe")]
@@ -33,6 +34,7 @@ enum Cmd {
     Fmt,
     Lint,
     Cross { target: String },
+    Bom,
 }
 
 fn main() -> Result<()> {
@@ -59,6 +61,7 @@ fn main() -> Result<()> {
         Cmd::Fmt => println!("Formatting via balua-fmt ..."),
         Cmd::Lint => println!("Linting via balua-clippy ..."),
         Cmd::Cross { target } => println!("Cross-compiling for '{}' (no_std, embedded)", target),
+        Cmd::Bom => { println!("{}", bom::generate_bom(&[])); },
     }
     Ok(())
 }

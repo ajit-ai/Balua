@@ -35,6 +35,13 @@ pub enum Item {
     UnsafeBlock(UnsafeBlock),
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SafetyTier {
+    Safe,
+    Unsafe,
+    Trusted,
+}
+
 #[derive(Debug, Clone)]
 pub struct FnDecl {
     pub name: String,
@@ -46,6 +53,7 @@ pub struct FnDecl {
     pub is_async: bool,
     pub is_extern: Option<String>,
     pub visibility: Visibility,
+    pub safety: SafetyTier,
     pub body: Option<Block>,
     pub span: Span,
 }
@@ -286,4 +294,20 @@ pub enum TypeExpr {
     Function { params: Vec<TypeExpr>, ret: Box<TypeExpr> },
     Chan(Box<TypeExpr>),
     Inferred,
+}
+
+#[derive(Debug, Clone)]
+pub struct BomEntry {
+    pub name: String,
+    pub version: String,
+    pub license: Option<String>,
+    pub source: Option<String>,
+    pub hash: Option<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Bom {
+    pub spec_version: String,
+    pub components: Vec<BomEntry>,
+    pub dependencies: Vec<BomEntry>,
 }
