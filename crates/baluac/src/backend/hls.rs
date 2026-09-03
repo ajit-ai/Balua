@@ -18,6 +18,7 @@ impl Backend for HlsBackend {
                 out.push_str(&format!("// Part: {} @ {} MHz\n", if self.part.is_empty() { "xcvu9p" } else { &self.part }, clk));
                 out.push_str(&format!("#pragma HLS INTERFACE m_axi port=input bundle=gmem\n"));
                 out.push_str(&format!("void {}(hls::stream<float> &input, hls::stream<float> &output) {{\n", f.name));
+                out.push_str("  #pragma HLS DATAFLOW\n");
                 out.push_str("  #pragma HLS PIPELINE II=1\n");
                 out.push_str("  #pragma HLS INTERFACE axis port=input\n");
                 out.push_str("  #pragma HLS INTERFACE axis port=output\n");

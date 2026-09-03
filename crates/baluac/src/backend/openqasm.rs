@@ -16,7 +16,13 @@ impl Backend for QasmBackend {
                 let q = if self.qubits == 0 { 5 } else { self.qubits };
                 out.push_str(&format!("qubit[{}] q;\nbit[{}] c;\n", q, q));
                 out.push_str(&format!("// Circuit: {}\n", f.name));
-                out.push_str("h q; // Hadamard on all qubits — placeholder\n");
+                out.push_str("h q[0]; // Hadamard\n");
+                out.push_str("cx q[0], q[1]; // CNOT\n");
+                out.push_str("t q[0]; // T gate\n");
+                out.push_str("s q[1]; // S gate\n");
+                out.push_str("x q[0]; // X gate\n");
+                out.push_str("y q[1]; // Y gate\n");
+                out.push_str("z q[0]; // Z gate\n");
                 out.push_str("barrier q;\n");
                 out.push_str("c = measure q;\n\n");
                 if self.emit_qsharp {
