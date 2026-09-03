@@ -78,7 +78,7 @@ fn main() -> anyhow::Result<()> {
         // Stage 3: Semantic
         let t = std::time::Instant::now();
         let mut analyzer = SemanticAnalyzer::new();
-        let mut sem_diags = analyzer.analyze(&program);
+        let (mut sem_diags, _type_table) = analyzer.analyze(&program);
         profile.record(EventKind::Semantic, t.elapsed().as_millis() as u64, file_str.clone());
         all_diags.append(&mut sem_diags);
 
