@@ -321,8 +321,11 @@ impl Parser {
         } else { None };
 
         let body = if self.check("{") { Some(self.parse_block()?) } else if self.check(";") { self.advance(); None } else { None };
-
-        Ok(FnDecl { name, generics, where_clause, params, ret_ty, hardware, is_async, is_extern, visibility, body, span: start })
+        let safety = if self.check("safe") { self.advance(); SafetyTier::Safe }
+            else if self.check("unsafe") { self.advance(); SafetyTier::Unsafe }
+            else if self.check("trusted") { self.advance(); SafetyTier::Trusted }
+            else { SafetyTier::Safe };
+        Ok(FnDecl { name, generics, where_clause, params, ret_ty, hardware, is_async, is_extern, visibility, safety, body, span: start })
     }
 
     fn parse_type(&mut self) -> Result<TypeExpr, Diagnostic> {
