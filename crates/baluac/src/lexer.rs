@@ -40,7 +40,7 @@ impl Token {
 const KEYWORDS: &[&str] = &[
     "fn", "let", "mut", "const", "struct", "enum", "trait", "impl", "mod", "module", "use",
     "if", "else", "for", "while", "loop", "match", "return", "break", "continue", "unsafe",
-    "async", "await", "spawn", "chan", "select", "extern", "type", "where", "pub", "priv",
+    "async", "await", "spawn", "chan", "send", "recv", "select", "extern", "type", "where", "pub", "priv",
     "self", "Self", "super", "crate", "box", "move", "in", "as", "is", "kernel", "circuit",
     "tensor", "qubit", "true", "false",
 ];

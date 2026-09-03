@@ -234,6 +234,13 @@ pub enum Stmt {
 }
 
 #[derive(Debug, Clone)]
+pub struct SelectArm {
+    pub chan: String,
+    pub body: Block,
+    pub span: Span,
+}
+
+#[derive(Debug, Clone)]
 pub enum Expr {
     Literal(Literal),
     Ident(String),
@@ -248,6 +255,11 @@ pub enum Expr {
     Match { expr: Box<Expr>, arms: Vec<MatchArm> },
     Cast { expr: Box<Expr>, ty: TypeExpr },
     For { var: String, iter: Box<Expr>, body: Box<Block> },
+    Spawn { task: Box<Expr> },
+    ChanCreate { ty: TypeExpr },
+    ChanSend { chan: Box<Expr>, value: Box<Expr> },
+    ChanRecv { chan: Box<Expr> },
+    Select { arms: Vec<SelectArm> },
 }
 
 #[derive(Debug, Clone)]
@@ -272,5 +284,6 @@ pub enum TypeExpr {
     Tensor { ty: Box<TypeExpr>, shape: Vec<usize> },
     Stream(Box<TypeExpr>),
     Function { params: Vec<TypeExpr>, ret: Box<TypeExpr> },
+    Chan(Box<TypeExpr>),
     Inferred,
 }

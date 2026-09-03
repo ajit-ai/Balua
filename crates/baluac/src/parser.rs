@@ -93,7 +93,7 @@ impl Parser {
     fn synchronize(&mut self) {
         while !self.at_eof() && !self.check(";") && !self.check("}") {
             self.advance();
-            if self.check("fn") || self.check("let") || self.check("const") || self.check("struct") || self.check("enum") || self.check("match") || self.check("for") || self.check("while") || self.check("loop") || self.check("return") || self.check("break") || self.check("continue") || self.check("unsafe") {
+            if self.check("fn") || self.check("let") || self.check("const") || self.check("struct") || self.check("enum") || self.check("match") || self.check("for") || self.check("while") || self.check("loop") || self.check("return") || self.check("break") || self.check("continue") || self.check("spawn") || self.check("chan") || self.check("select") || self.check("unsafe") {
                 break;
             }
         }
@@ -372,6 +372,7 @@ impl Parser {
             self.expect("]")?;
             return Ok(TypeExpr::Array { inner, size: sz });
         }
+        if base == "chan" { self.advance(); let inner = Box::new(self.parse_type()?); return Ok(TypeExpr::Chan(inner)); }
         Ok(TypeExpr::Primitive(base))
     }
 
@@ -436,6 +437,11 @@ impl Parser {
             let ty = self.parse_type()?;
             expr = Expr::Cast { expr: Box::new(expr), ty };
         }
+        if self.check("spawn") { self.advance(); let task = Box::new(self.parse_expr()?); expr = Expr::Spawn { task }; }
+        if self.check("chan") { self.advance(); let ty = self.parse_type()?; expr = Expr::ChanCreate { ty }; }
+        if self.check("send") { self.advance(); let chan = Box::new(self.parse_expr()?); let value = Box::new(self.parse_expr()?); expr = Expr::ChanSend { chan, value }; }
+        if self.check("recv") { self.advance(); let chan = Box::new(self.parse_expr()?); expr = Expr::ChanRecv { chan }; }
+        if self.check("select") { self.advance(); let mut arms = Vec::new(); self.expect("{")?; while !self.check("}") && !self.at_eof() { let chan = self.advance().lexeme; let body = self.parse_block()?; arms.push(SelectArm { chan, body, span: self.peek().span.clone() }); if self.check(",") { self.advance(); } } self.expect("}")?; expr = Expr::Select { arms }; }
         if self.peek().kind == TokenKind::Operator {
             let op = self.advance().lexeme;
             let rhs = self.parse_expr()?;
@@ -504,6 +510,22 @@ impl Parser {
                 let then_block = self.parse_block()?;
                 let else_block = if self.check("else") { self.advance(); Some(Box::new(Expr::Block(self.parse_block()?))) } else { None };
                 stmts.push(Stmt::Expr(Expr::If { cond: Box::new(cond), then_block: Box::new(then_block), else_block }));
+            } else if self.check("spawn") {
+                self.advance();
+                let body = self.parse_block()?;
+                stmts.push(Stmt::Expr(Expr::Spawn { task: Box::new(Expr::Block(body)) }));
+            } else if self.check("select") {
+                self.advance();
+                let mut arms = Vec::new();
+                self.expect("{")?;
+                while !self.check("}") && !self.at_eof() {
+                    let chan = self.advance().lexeme;
+                    let body = self.parse_block()?;
+                    arms.push(SelectArm { chan, body, span: self.peek().span.clone() });
+                    if self.check(",") { self.advance(); }
+                }
+                self.expect("}")?;
+                stmts.push(Stmt::Expr(Expr::Select { arms }));
             } else {
                 let e = self.parse_expr()?;
                 if self.check(";") { self.advance(); }
