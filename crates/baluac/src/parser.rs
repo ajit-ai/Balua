@@ -117,6 +117,12 @@ impl Parser {
 
         let tok = self.peek().clone();
         match tok.lexeme.as_str() {
+            "pub" | "priv" => {
+                let vis = if self.check("pub") { self.advance(); Visibility::Pub } else { self.advance(); Visibility::Priv };
+                if self.check("const") { let mut c = self.parse_const_decl()?; c.visibility = vis; return Ok(Item::ConstDecl(c)); }
+                if self.check("fn") { let mut decl = self.parse_fn_decl()?; decl.visibility = vis; if let Some(h) = hw { decl.hardware = Some(h); } return Ok(Item::FnDecl(decl)); }
+                return Err(Diagnostic::error(format!("Expected fn or const after visibility but found '{}'", self.peek().lexeme)).with_span(self.peek().span.clone()));
+            }
             "fn" | "async" => {
                 let mut decl = self.parse_fn_decl()?;
                 if let Some(h) = hw {
@@ -270,9 +276,11 @@ impl Parser {
         } else { None };
 
         self.expect("fn")?;
-        let visibility = if self.check("pub") { self.advance(); Visibility::Pub }
-            else if self.check("priv") { self.advance(); Visibility::Priv }
-            else { Visibility::Default };
+        let safety = if self.check("safe") { self.advance(); SafetyTier::Safe }
+            else if self.check("unsafe") { self.advance(); SafetyTier::Unsafe }
+            else if self.check("trusted") { self.advance(); SafetyTier::Trusted }
+            else { SafetyTier::Safe };
+        // visibility already consumed by parse_item (pub/priv before fn)
         let name = self.advance().lexeme; // ident
         // generics <...>
         let generics = if self.check("<") {
@@ -325,7 +333,7 @@ impl Parser {
             else if self.check("unsafe") { self.advance(); SafetyTier::Unsafe }
             else if self.check("trusted") { self.advance(); SafetyTier::Trusted }
             else { SafetyTier::Safe };
-        Ok(FnDecl { name, generics, where_clause, params, ret_ty, hardware, is_async, is_extern, visibility, safety, body, span: start })
+        Ok(FnDecl { name, generics, where_clause, params, ret_ty, hardware, is_async, is_extern, visibility: Visibility::Default, safety, body, span: start })
     }
 
     fn parse_type(&mut self) -> Result<TypeExpr, Diagnostic> {
@@ -523,6 +531,7 @@ impl Parser {
                 self.expect("{")?;
                 while !self.check("}") && !self.at_eof() {
                     let chan = self.advance().lexeme;
+                    self.expect("=>")?;
                     let body = self.parse_block()?;
                     arms.push(SelectArm { chan, body, span: self.peek().span.clone() });
                     if self.check(",") { self.advance(); }

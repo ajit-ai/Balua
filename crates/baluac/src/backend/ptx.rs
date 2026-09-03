@@ -19,7 +19,7 @@ impl Backend for PtxBackend {
             for f in &m.functions {
                 if !matches!(f.hardware, Some(crate::ast::HardwareTarget::Gpu | crate::ast::HardwareTarget::Npu)) { continue; }
                 has_kernel = true;
-                let target_str = match f.hardware { Some(crate::ast::HardwareTarget::Npu) => "NPU", _ => "GPU" };
+                let _target_str = match f.hardware { Some(crate::ast::HardwareTarget::Npu) => "NPU", _ => "GPU" };
                 out.push_str(&format!(".visible .entry {}(\n  .param .u64 A,\n  .param .u64 B,\n  .param .u64 C,\n  .param .u32 N\n) {{\n", f.name));
                 out.push_str("  .reg .pred %p;\n");
                 out.push_str("  .reg .u32 %tid_x, %tid_y, %bid_x, %bid_y, %row, %col, %idx;\n");
