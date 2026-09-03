@@ -22,14 +22,16 @@ impl BorrowChecker {
     /// Record a borrow: &T or &mut T
     pub fn borrow(&mut self, var: &str, kind: BorrowKind) {
         let entry = self.loans.entry(var.to_string()).or_default();
-        // mutable borrow while shared borrows alive = error
+        // mutable borrow while shared borrows alive = error (E_BORROW_CONFLICT)
         if kind == BorrowKind::Mut && entry.iter().any(|l| l.alive) {
             self.diagnostics.push(Diagnostic::error(format!("Cannot borrow '{}' as mutable: already borrowed", var))
+                .with_code("E_BORROW_CONFLICT")
                 .with_hint("Shared borrows must end before mutable borrow."));
         }
-        // shared borrow while mutable alive = error
+        // shared borrow while mutable alive = error (E_BORROW_CONFLICT)
         if kind == BorrowKind::Shared && entry.iter().any(|l| l.alive && l.kind == BorrowKind::Mut) {
             self.diagnostics.push(Diagnostic::error(format!("Cannot borrow '{}' as shared: mutably borrowed", var))
+                .with_code("E_BORROW_CONFLICT")
                 .with_hint("Mutable borrow is exclusive."));
         }
         entry.push(Loan { var: var.to_string(), kind, alive: true });
@@ -38,7 +40,8 @@ impl BorrowChecker {
     /// Move semantics: moving to GPU invalidates CPU handle
     pub fn move_to_device(&mut self, var: &str, target: &str) {
         if self.moved.contains_key(var) {
-            self.diagnostics.push(Diagnostic::error(format!("Use of moved value '{}' — already moved to {}", var, self.moved[var])));
+            self.diagnostics.push(Diagnostic::error(format!("Use of moved value '{}' — already moved to {}", var, self.moved[var]))
+                .with_code("E_USE_AFTER_MOVE"));
         } else {
             self.moved.insert(var.to_string(), target.to_string());
         }

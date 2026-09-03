@@ -329,10 +329,6 @@ impl Parser {
         } else { None };
 
         let body = if self.check("{") { Some(self.parse_block()?) } else if self.check(";") { self.advance(); None } else { None };
-        let safety = if self.check("safe") { self.advance(); SafetyTier::Safe }
-            else if self.check("unsafe") { self.advance(); SafetyTier::Unsafe }
-            else if self.check("trusted") { self.advance(); SafetyTier::Trusted }
-            else { SafetyTier::Safe };
         Ok(FnDecl { name, generics, where_clause, params, ret_ty, hardware, is_async, is_extern, visibility: Visibility::Default, safety, body, span: start })
     }
 
@@ -546,6 +542,7 @@ impl Parser {
                 self.advance();
                 let body = self.parse_block()?;
                 stmts.push(Stmt::Expr(Expr::Spawn { task: Box::new(Expr::Block(body)) }));
+                if self.check(";") { self.advance(); }
             } else if self.check("select") {
                 self.advance();
                 let mut arms = Vec::new();
@@ -559,6 +556,7 @@ impl Parser {
                 }
                 self.expect("}")?;
                 stmts.push(Stmt::Expr(Expr::Select { arms }));
+                if self.check(";") { self.advance(); }
             } else {
                 let e = self.parse_expr()?;
                 if self.check(";") { self.advance(); }
