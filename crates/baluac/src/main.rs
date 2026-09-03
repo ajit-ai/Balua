@@ -44,11 +44,17 @@ struct Args {
     /// Safety profile
     #[arg(long)]
     safety_profile: Option<String>,
+
+    /// Verbose output with compilation events
+    #[arg(long)]
+    verbose: bool,
 }
 
 fn main() -> anyhow::Result<()> {
     env_logger::init();
     let args = Args::parse();
+    let mut profile = Profile::new();
+    let t0 = std::time::Instant::now();
 
     let mut all_diags: Vec<Diagnostic> = Vec::new();
     for file in &args.files {
@@ -56,22 +62,30 @@ fn main() -> anyhow::Result<()> {
         let file_str = file.display().to_string();
 
         // Stage 1: Lex
+        let t = std::time::Instant::now();
         let mut lexer = Lexer::new(&src, file_str.clone());
         let (tokens, mut lex_diags) = lexer.tokenize();
+        profile.record(EventKind::Lex, t.elapsed().as_millis() as u64, file_str.clone());
         all_diags.append(&mut lex_diags);
 
         // Stage 2: Parse
+        let t = std::time::Instant::now();
         let mut parser = Parser::new(tokens);
         let (program, mut parse_diags) = parser.parse_program();
+        profile.record(EventKind::Parse, t.elapsed().as_millis() as u64, file_str.clone());
         all_diags.append(&mut parse_diags);
 
         // Stage 3: Semantic
+        let t = std::time::Instant::now();
         let mut analyzer = SemanticAnalyzer::new();
         let mut sem_diags = analyzer.analyze(&program);
+        profile.record(EventKind::Semantic, t.elapsed().as_millis() as u64, file_str.clone());
         all_diags.append(&mut sem_diags);
 
         // Stage 4: MIR
+        let t = std::time::Instant::now();
         let mir = MirBuilder::lower(&program);
+        profile.record(EventKind::Codegen, t.elapsed().as_millis() as u64, file_str.clone());
         if args.emit_mir {
             println!("{}", MirBuilder::to_json(&mir));
         }
@@ -86,15 +100,24 @@ fn main() -> anyhow::Result<()> {
         if args.backend.is_some() {
             let hw = args.backend.as_deref().unwrap();
             let be = baluac_lib::backend::select_backend(hw);
-            // Emit selected backend to stdout for inspection (balua --backend ptx hello.bl)
             if !args.emit_llvm && !args.emit_clif && !args.emit_mir {
                 println!("{}", be.lower(&mir).unwrap());
             }
         }
 
-        if let Some(profile) = &args.safety_profile {
-            println!("; Safety profile: {} — checks enabled (MISRA/AUTOSAR/DO-178C)", profile);
+        if let Some(profile_name) = &args.safety_profile {
+            println!("; Safety profile: {} — checks enabled (MISRA/AUTOSAR/DO-178C)", profile_name);
         }
+        if args.verbose {
+            eprintln!("[verbose] lex {:?}ms, parse {:?}ms, semantic {:?}ms", 
+                profile.events.iter().filter(|e| matches!(e.kind, EventKind::Lex)).last().map(|e| e.duration_ms).unwrap_or(0),
+                profile.events.iter().filter(|e| matches!(e.kind, EventKind::Parse)).last().map(|e| e.duration_ms).unwrap_or(0),
+                profile.events.iter().filter(|e| matches!(e.kind, EventKind::Semantic)).last().map(|e| e.duration_ms).unwrap_or(0));
+        }
+    }
+    profile.total_ms = t0.elapsed().as_millis() as u64;
+    if args.verbose {
+        println!("{}", serde_json::to_string_pretty(&profile).unwrap());
     }
 
     if !all_diags.is_empty() {
@@ -109,7 +132,6 @@ fn main() -> anyhow::Result<()> {
             std::process::exit(1);
         }
     } else if !args.emit_llvm && !args.emit_mir {
-        // Windows: balua hello.bl  (as requested)
         let exe = std::env::current_exe().ok().and_then(|p| p.file_name().map(|n| n.to_string_lossy().into_owned())).unwrap_or("balua".into());
         println!("{}: compilation successful ({} files, target: {})", exe.trim_end_matches(".exe"), args.files.len(), args.target);
     }

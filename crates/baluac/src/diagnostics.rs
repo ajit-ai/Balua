@@ -84,3 +84,33 @@ impl std::fmt::Display for Diagnostic {
         Ok(())
     }
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum EventKind {
+    Lex,
+    Parse,
+    Semantic,
+    Codegen,
+    Link,
+    Opt,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CompileEvent {
+    pub kind: EventKind,
+    pub duration_ms: u64,
+    pub detail: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Profile {
+    pub events: Vec<CompileEvent>,
+    pub total_ms: u64,
+}
+
+impl Profile {
+    pub fn new() -> Self { Self { events: vec![], total_ms: 0 } }
+    pub fn record(&mut self, kind: EventKind, duration_ms: u64, detail: impl Into<String>) {
+        self.events.push(CompileEvent { kind, duration_ms, detail: detail.into() });
+    }
+}
