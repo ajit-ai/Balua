@@ -112,7 +112,7 @@ mod tests {
     #[test]
     fn emits_typed_ir() {
         let m = MirModule { name: "test".into(), functions: vec![MirFunction {
-            name: "add".into(), hardware: None,
+            name: "add".into(), hardware: None, params: vec![("a".into(), "i32".into()), ("b".into(), "i32".into())],
             basic_blocks: vec![BasicBlock { id: 0, hardware: None, instructions: vec![Instruction::BinOp { dest: "%0".into(), op: "+".into(), lhs: "%a".into(), rhs: "%b".into() }], terminator: Terminator::Return(Some("%0".into())) }],
             span: Span { file: "t".into(), line:1, col:1, end_line:1, end_col:1 }
         }] };

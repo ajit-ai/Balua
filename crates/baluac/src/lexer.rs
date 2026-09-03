@@ -54,8 +54,7 @@ const HARDWARE_DIRECTIVES: &[&str] = &[
     "@hw::embedded",
 ];
 
-pub struct Lexer<'a> {
-    src: &'a str,
+pub struct Lexer {
     chars: Vec<char>,
     pos: usize,
     line: usize,
@@ -63,10 +62,9 @@ pub struct Lexer<'a> {
     file: String,
 }
 
-impl<'a> Lexer<'a> {
-    pub fn new(src: &'a str, file: impl Into<String>) -> Self {
+impl Lexer {
+    pub fn new(src: &str, file: impl Into<String>) -> Self {
         Self {
-            src,
             chars: src.chars().collect(),
             pos: 0,
             line: 1,
@@ -95,16 +93,6 @@ impl<'a> Lexer<'a> {
             }
         }
         ch
-    }
-
-    fn make_span(&self, start_line: usize, start_col: usize) -> Span {
-        Span {
-            file: self.file.clone(),
-            line: start_line,
-            col: start_col,
-            end_line: self.line,
-            end_col: self.col,
-        }
     }
 
     fn skip_whitespace(&mut self) {

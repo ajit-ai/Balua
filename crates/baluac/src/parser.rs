@@ -36,6 +36,11 @@ impl Parser {
         self.peek().lexeme == lex
     }
 
+    /// Peek at the token one past the current position (without advancing).
+    fn peek_next(&self) -> Option<&Token> {
+        self.tokens.get(self.pos + 1)
+    }
+
     fn check_kind(&self, kind: TokenKind) -> bool {
         self.peek().kind == kind
     }
@@ -557,6 +562,14 @@ impl Parser {
                 self.expect("}")?;
                 stmts.push(Stmt::Expr(Expr::Select { arms }));
                 if self.check(";") { self.advance(); }
+            } else if self.check_kind(TokenKind::Identifier)
+                && self.peek_next().map(|t| t.lexeme == "=").unwrap_or(false) {
+                // `ident = expr` — an assignment statement, not a binary `=` expression.
+                let name = self.advance().lexeme;
+                self.expect("=")?;
+                let rhs = self.parse_expr()?;
+                if self.check(";") { self.advance(); }
+                stmts.push(Stmt::Assign { lhs: Expr::Ident(name), rhs });
             } else {
                 let e = self.parse_expr()?;
                 if self.check(";") { self.advance(); }

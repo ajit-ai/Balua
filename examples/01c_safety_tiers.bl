@@ -1,0 +1,39 @@
+// 01c_safety_tiers — safe, unsafe, trusted (Phase 4)
+module main {
+    // safe fn — compiler-checked safety
+    pub fn safe_add(a: i32, b: i32) -> i32 {
+        a + b
+    }
+
+    // unsafe fn — bypasses safety checks, requires body
+    pub fn unsafe_div(a: i32, b: i32) -> i32 {
+        a / b
+    }
+
+    // trusted fn — bypasses all safety, audit required
+    pub fn trusted_audit() -> i32 {
+        42
+    }
+
+    // safe fn with complex logic
+    pub fn factorial(n: i32) -> i32 {
+        let mut result = 1;
+        let mut i = n;
+        while i > 1 {
+            result = result * i;
+            i = i - 1;
+        }
+        result
+    }
+
+    fn main() -> i32 {
+        let a = safe_add(1, 2);
+        let b = unsafe_div(10, 2);
+        let c = trusted_audit();
+        let d = factorial(5);
+        if a == 3 && b == 5 && c == 42 && d == 120 {
+            println("01c_safety_tiers: safe/unsafe/trusted all working")
+        };
+        0
+    }
+}

@@ -6,6 +6,7 @@ pub mod cranelift;
 pub mod hls;
 pub mod llvm;
 pub mod mlir_dialect;
+pub mod object_emit;
 pub mod openqasm;
 pub mod ptx;
 pub mod spirv;

@@ -1,0 +1,10 @@
+fn hello() -> i32 {
+    let name = "Balua";
+    let version = 1;
+    version
+}
+
+fn main() -> i32 {
+    let v = hello();
+    v
+}

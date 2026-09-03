@@ -1,0 +1,34 @@
+// 01d_visibility — pub/priv visibility (Phase 4)
+module main {
+    // pub const — accessible from other modules
+    pub const MAX_VAL: i32 = 100;
+    pub const PI: f32 = 3.14159;
+
+    // priv const — internal only
+    priv const INTERNAL: i32 = 42;
+
+    // pub fn — public API
+    pub fn public_api() -> i32 {
+        MAX_VAL + INTERNAL
+    }
+
+    // priv fn — internal helper
+    priv fn internal_helper() -> i32 {
+        INTERNAL * 2
+    }
+
+    // pub fn using priv helper
+    pub fn combined() -> i32 {
+        public_api() + internal_helper()
+    }
+
+    fn main() -> i32 {
+        let a = public_api();
+        let b = internal_helper();
+        let c = combined();
+        if a == 142 && b == 84 && c == 226 && MAX_VAL == 100 && INTERNAL == 42 {
+            println("01d_visibility: pub/priv const and fn working")
+        };
+        0
+    }
+}
