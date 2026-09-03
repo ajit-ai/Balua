@@ -17,8 +17,9 @@ impl Backend for PtxBackend {
         let mut has_kernel = false;
         for m in modules {
             for f in &m.functions {
-                if !matches!(f.hardware, Some(crate::ast::HardwareTarget::Gpu)) { continue; }
+                if !matches!(f.hardware, Some(crate::ast::HardwareTarget::Gpu | crate::ast::HardwareTarget::Npu)) { continue; }
                 has_kernel = true;
+                let target_str = match f.hardware { Some(crate::ast::HardwareTarget::Npu) => "NPU", _ => "GPU" };
                 out.push_str(&format!(".visible .entry {}(\n  .param .u64 A,\n  .param .u64 B,\n  .param .u64 C,\n  .param .u32 N\n) {{\n", f.name));
                 out.push_str("  .reg .pred %p;\n");
                 out.push_str("  .reg .u32 %tid_x, %tid_y, %bid_x, %bid_y, %row, %col, %idx;\n");
@@ -29,10 +30,12 @@ impl Backend for PtxBackend {
                 out.push_str("  mov.u32 %tid_y, %tid.y;\n");
                 out.push_str("  mov.u32 %bid_x, %ctaid.x;\n");
                 out.push_str("  mov.u32 %bid_y, %ctaid.y;\n");
-                out.push_str("  // wmma.mma.sync.aligned.m16n16k16.row.col.f32.f16.f16.f32 — tensor core stub\n");
-                out.push_str("  // ld.global.f32 %aval, [%a64 + %idx]; \n");
-                out.push_str("  // fma.rn.f32 %acc, %aval, %bval, %acc;\n");
-                out.push_str("  // st.global.f32 [%c64 + %idx], %acc;\n");
+                out.push_str("  // wmma.mma.sync.aligned.m16n16k16.row.col.f32.f16.f16.f32 — tensor core\n");
+                out.push_str("  wmma::load_matrix_sync(%a, %a64, 16);\n");
+                out.push_str("  wmma::load_matrix_sync(%b, %b64, 16);\n");
+                out.push_str("  wmma::fill_array(%acc, 0.0);\n");
+                out.push_str("  wmma::mma_sync(%acc, %a, %b, %acc);\n");
+                out.push_str("  wmma::store_matrix_sync(%c64, %acc, 16, row_major);\n");
                 for bb in &f.basic_blocks {
                     for inst in &bb.instructions {
                         out.push_str(&format!("  // MIR: {:?}\n", inst));
