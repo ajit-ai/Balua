@@ -1,0 +1,24 @@
+// 05a_dx_observability — --verbose, compile profile (Phase 7)
+module main {
+    // Example program to profile
+    pub fn compute(n: i32) -> i32 {
+        let mut sum = 0;
+        for i in 0..n {
+            sum = sum + i;
+        }
+        sum
+    }
+
+    pub fn recursive_fib(n: i32) -> i32 {
+        if n <= 1 { n } else { recursive_fib(n - 1) + recursive_fib(n - 2) }
+    }
+
+    fn main() -> i32 {
+        let a = compute(100);
+        let b = recursive_fib(10);
+        if a == 4950 && b == 55 {
+            println("05a_dx_observability: compute+fib working")
+        };
+        0
+    }
+}

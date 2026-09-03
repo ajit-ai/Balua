@@ -37,6 +37,14 @@ struct Args {
     #[arg(long)]
     emit_clif: bool,
 
+    /// Output artifact path. Without further flags, produces a linked executable.
+    #[arg(short = 'o')]
+    output: Option<PathBuf>,
+
+    /// Keep the intermediate object file when producing an executable.
+    #[arg(long)]
+    keep_object: bool,
+
     /// JSON diagnostics for IDE
     #[arg(long)]
     json_diagnostics: bool,
@@ -57,6 +65,7 @@ fn main() -> anyhow::Result<()> {
     let t0 = std::time::Instant::now();
 
     let mut all_diags: Vec<Diagnostic> = Vec::new();
+    let mut mir_all: Vec<baluac_lib::mir::MirModule> = Vec::new();
     for file in &args.files {
         let src = std::fs::read_to_string(file)?;
         let file_str = file.display().to_string();
@@ -85,6 +94,7 @@ fn main() -> anyhow::Result<()> {
         // Stage 4: MIR
         let t = std::time::Instant::now();
         let mir = MirBuilder::lower(&program);
+        mir_all.extend(mir.clone());
         profile.record(EventKind::Codegen, t.elapsed().as_millis() as u64, file_str.clone());
         if args.emit_mir {
             println!("{}", MirBuilder::to_json(&mir));
@@ -131,6 +141,17 @@ fn main() -> anyhow::Result<()> {
         if all_diags.iter().any(|d| matches!(d.severity, Severity::Error)) {
             std::process::exit(1);
         }
+    } else if let Some(out) = &args.output {
+        // Phase 2: produce a linked executable via the Cranelift backend.
+        let opt = 0u8;
+        let summary = baluac_lib::backend::object_emit::build_executable(
+            &mir_all,
+            out,
+            opt,
+            args.keep_object,
+        )?;
+        let _ = summary;
+        println!("balua: produced executable {}", out.display());
     } else if !args.emit_llvm && !args.emit_mir {
         let exe = std::env::current_exe().ok().and_then(|p| p.file_name().map(|n| n.to_string_lossy().into_owned())).unwrap_or("balua".into());
         println!("{}: compilation successful ({} files, target: {})", exe.trim_end_matches(".exe"), args.files.len(), args.target);

@@ -62,7 +62,7 @@ mod tests {
     #[test]
     fn emits_ptx_header() {
         let ann = HardwareAnnotation { target: HardwareTarget::Gpu, params: vec![], span: Span { file:"t".into(), line:1, col:1, end_line:1, end_col:1 } };
-        let m = MirModule { name: "m".into(), functions: vec![MirFunction { name: "k".into(), hardware: Some(HardwareTarget::Gpu), basic_blocks: vec![BasicBlock { id:0, hardware: Some(ann), instructions: vec![], terminator: Terminator::Return(None) }], span: Span { file:"t".into(), line:1, col:1, end_line:1, end_col:1 } }] };
+        let m = MirModule { name: "m".into(), functions: vec![MirFunction { name: "k".into(), hardware: Some(HardwareTarget::Gpu), params: vec![], basic_blocks: vec![BasicBlock { id:0, hardware: Some(ann), instructions: vec![], terminator: Terminator::Return(None) }], span: Span { file:"t".into(), line:1, col:1, end_line:1, end_col:1 } }] };
         let ptx = PtxBackend { sm_version: "sm_90".into() }.lower(&[m]).unwrap();
         assert!(ptx.contains(".version 8.0"));
         assert!(ptx.contains(".visible .entry k"));
