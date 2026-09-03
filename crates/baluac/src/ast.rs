@@ -21,6 +21,7 @@ pub struct Module {
 pub enum Item {
     FnDecl(FnDecl),
     VarDecl(VarDecl),
+    ConstDecl(ConstDecl),
     StructDecl(StructDecl),
     EnumDecl(EnumDecl),
     TraitDecl(TraitDecl),
@@ -38,11 +39,13 @@ pub enum Item {
 pub struct FnDecl {
     pub name: String,
     pub generics: Vec<String>,
+    pub where_clause: Vec<(String, String)>,
     pub params: Vec<Param>,
     pub ret_ty: Option<TypeExpr>,
     pub hardware: Option<HardwareAnnotation>,
     pub is_async: bool,
     pub is_extern: Option<String>,
+    pub visibility: Visibility,
     pub body: Option<Block>,
     pub span: Span,
 }
@@ -62,6 +65,22 @@ pub struct VarDecl {
     pub is_mut: bool,
     pub ownership: Ownership,
     pub span: Span,
+}
+
+#[derive(Debug, Clone)]
+pub struct ConstDecl {
+    pub name: String,
+    pub ty: Option<TypeExpr>,
+    pub value: Expr,
+    pub visibility: Visibility,
+    pub span: Span,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Visibility {
+    Pub,
+    Priv,
+    Default,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -151,6 +170,12 @@ pub struct EnumVariant {
 }
 
 #[derive(Debug, Clone)]
+pub struct MatchArm {
+    pub pattern: String,
+    pub expr: Expr,
+}
+
+#[derive(Debug, Clone)]
 pub struct TraitDecl {
     pub name: String,
     pub methods: Vec<FnDecl>,
@@ -195,9 +220,17 @@ pub struct Block {
 #[derive(Debug, Clone)]
 pub enum Stmt {
     Let(VarDecl),
+    Const(ConstDecl),
     Expr(Expr),
     Return(Option<Expr>),
     Assign { lhs: Expr, rhs: Expr },
+    Match { expr: Expr, arms: Vec<MatchArm> },
+    For { var: String, iter: Expr, body: Block },
+    While { cond: Expr, body: Block },
+    Loop { body: Block },
+    Break(Option<Expr>),
+    Continue,
+    Unsafe(UnsafeBlock),
 }
 
 #[derive(Debug, Clone)]
@@ -211,6 +244,10 @@ pub enum Expr {
     LifetimeAnnotation { name: String, expr: Box<Expr> },
     Unsafe(Box<UnsafeBlock>),
     Block(Block),
+    If { cond: Box<Expr>, then_block: Box<Block>, else_block: Option<Box<Expr>> },
+    Match { expr: Box<Expr>, arms: Vec<MatchArm> },
+    Cast { expr: Box<Expr>, ty: TypeExpr },
+    For { var: String, iter: Box<Expr>, body: Box<Block> },
 }
 
 #[derive(Debug, Clone)]
