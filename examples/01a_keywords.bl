@@ -1,0 +1,65 @@
+// 01a_keywords — const, match, for, while, loop, break, continue, where, pub/priv, cast (Phase 2a)
+module main {
+    pub const MAX_VAL: i32 = 100;
+    pub const PI: f32 = 3.14159;
+    priv const INTERNAL: i32 = 42;
+
+    pub fn factorial(n: i32) -> i32 {
+        let mut result = 1;
+        let mut i = n;
+        while i > 1 {
+            result = result * i;
+            i = i - 1;
+        }
+        result
+    }
+
+    pub fn loop_test() -> i32 {
+        let mut i = 0;
+        loop {
+            i = i + 1;
+            if i == 5 { break i }
+        }
+        i
+    }
+
+    pub fn match_test(x: i32) -> i32 {
+        let r = match x {
+            1 => 10,
+            2 => 20,
+            _ => 0
+        };
+        r + x
+    }
+
+    pub fn for_test() -> i32 {
+        let mut s = 0;
+        for i in 0..10 {
+            if i % 2 == 0 { continue }
+            s = s + i
+        }
+        s
+    }
+
+    pub fn cast_test(x: i32) -> f32 {
+        x as f32
+    }
+
+    pub fn where_test<T: Ord, K: Copy>(a: T, b: K) -> T {
+        a
+    }
+
+    priv fn helper() -> i32 { INTERNAL }
+
+    fn main() -> i32 {
+        let a = factorial(5);
+        let b = loop_test();
+        let c = match_test(1);
+        let d = for_test();
+        let e = cast_test(42);
+        let f = where_test(10, 20);
+        let g = helper();
+        let ok = a == 120 && b == 5 && c == 11 && d == 25 && e == 42.0 && f == 10 && g == 42 && MAX_VAL == 100;
+        if ok { 0 } else { 1 }
+    }
+}
