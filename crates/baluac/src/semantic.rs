@@ -220,6 +220,57 @@ impl SemanticAnalyzer {
                         }
                     }
                 }
+                Stmt::Expr(Expr::Spawn { task }) => {
+                    if let Expr::Block(b) = task.as_ref() {
+                        self.check_ownership_in_block(b, hw);
+                    }
+                    // spawn requires Send bound on captured vars — simplified check
+                }
+                Stmt::Expr(Expr::ChanCreate { ty }) => {
+                    if let TypeExpr::Chan(inner) = ty {
+                        if let TypeExpr::Primitive(p) = inner.as_ref() {
+                            if p.contains("mut") {
+                                self.diagnostics.push(Diagnostic {
+                                    severity: Severity::Error,
+                                    code: Some("E_CHAN_MUT".into()),
+                                    message: format!("Channel of type mut {} requires Sync sender", p),
+                                    span: Some(block.span.clone()),
+                                    hint: Some("Use shared reference for channel element.".into()),
+                                    hardware_context: None,
+                                });
+                            }
+                        }
+                    }
+                }
+                Stmt::Expr(Expr::ChanSend { chan, .. }) | Stmt::Expr(Expr::ChanRecv { chan }) => {
+                    if let Expr::Ident(name) = chan.as_ref() {
+                        if self.moved_vars.contains_key(name) {
+                            self.diagnostics.push(Diagnostic {
+                                severity: Severity::Error,
+                                code: Some("E_USE_AFTER_MOVE".into()),
+                                message: format!("Use of moved channel '{}'", name),
+                                span: Some(block.span.clone()),
+                                hint: None,
+                                hardware_context: None,
+                            });
+                        }
+                    }
+                }
+                Stmt::Expr(Expr::Select { arms }) => {
+                    if arms.is_empty() {
+                        self.diagnostics.push(Diagnostic {
+                            severity: Severity::Warning,
+                            code: Some("W_SELECT_EMPTY".into()),
+                            message: "Select expression has no arms".into(),
+                            span: None,
+                            hint: Some("Add at least one select arm.".into()),
+                            hardware_context: None,
+                        });
+                    }
+                    for arm in arms {
+                        self.check_ownership_in_block(&arm.body, hw);
+                    }
+                }
                 _ => {}
             }
         }
