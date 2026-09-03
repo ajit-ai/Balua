@@ -83,6 +83,34 @@ impl SemanticAnalyzer {
             }
         }
 
+        // Safety tier validation
+        match f.safety {
+            SafetyTier::Unsafe => {
+                if f.body.is_none() {
+                    self.diagnostics.push(Diagnostic {
+                        severity: Severity::Error,
+                        code: Some("E_SAFE_NO_BODY".into()),
+                        message: format!("Unsafe function '{}' must have a body", f.name),
+                        span: Some(f.span.clone()),
+                        hint: Some("Add an unsafe { } block or mark as trusted.".into()),
+                        hardware_context: None,
+                    });
+                }
+            }
+            SafetyTier::Trusted => {
+                // trusted: no safety checks enforced, but log for audit
+                self.diagnostics.push(Diagnostic {
+                    severity: Severity::Warning,
+                    code: Some("W_TRUSTED_FUNCTION".into()),
+                    message: format!("Trusted function '{}' bypasses safety checks — audit required", f.name),
+                    span: Some(f.span.clone()),
+                    hint: Some("Ensure trusted function is reviewed by security team.".to_string()),
+                    hardware_context: None,
+                });
+            }
+            SafetyTier::Safe => {}
+        }
+
         // Lifetime / ownership checks inside body
         if let Some(body) = &f.body {
             self.check_ownership_in_block(body, f.hardware.as_ref());
