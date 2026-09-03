@@ -1,4 +1,4 @@
-# Balua NFR Implementation Roadmap (v1.0 → v1.0 production)
+# Balua NFR Implementation Roadmap (v0.9.0 → v1.0.0 production)
 
 > Maps every non-functional requirement (Scalability, Parallelism, Security, Performance, Portability, Reliability, DX, Maintainability, Safety, Observability, Ecosystem, Compilation-time, Hardware) to concrete phases.
 > Each phase commits to `develop` → merges `develop→main` per `GIT_WORKFLOW.md:15`.
@@ -18,15 +18,16 @@
 | Phase | ETA | NFRs addressed | Exit tag |
 |-------|-----|----------------|----------|
 | Phase 0 | DONE | Scaffold (v1.0.0) | `v0.1.0` |
-| Phase 1 | DONE | Backend hardening | `phase-1` |
-| Phase 2 | Month 1–2 | Performance + Compilation-time | `phase-2` |
-| Phase 3 | Month 3–4 | Parallelism + Portability (runtime) | `phase-3` |
-| Phase 4 | Month 5–6 | Security + Maintainability | `phase-4` |
-| Phase 5 | Month 7–10 | Performance (GPU/NPU real) | `phase-5` |
-| Phase 6 | Month 11–14 | Portability (FPGA/Quantum) | `phase-6` |
-| Phase 7 | Month 15–18 | DX + Observability | `phase-7` |
-| Phase 8 | Month 19–22 | Reliability + Self-host | `phase-8` |
-| Phase 9 | Month 23–24 | Ecosystem + Governance | `v1.0` |
+| Phase 1 | DONE | Backend hardening (LLVM/PTX/SPIR-V/HLS/QASM/MLIR) | `phase-1` |
+| Phase 2a | DONE | Keywords — const/match/for-while-loop/break-continue/where/pub/priv/cast | `phase-2a` |
+| Phase 2b | DONE | LLVM backend — string/llvm-sys split, `--features llvm`, LTO/PGO/BOLT | `phase-2b` |
+| Phase 3 | DONE | Parallelism runtime — spawn/chan/send/recv/select, Send/Sync | `phase-3` |
+| Phase 4 | DONE | Security/safety — safe/unsafe/trusted tiers, SBOM (Bom.toml) | `phase-4` |
+| Phase 5 | DONE | GPU/NPU — wmma PTX, @hw::npu | `phase-5` |
+| Phase 6 | DONE | FPGA/Quantum — HLS DATAFLOW, OpenQASM gates | `phase-6` |
+| Phase 7 | DONE | DX/Observability — compile events, --verbose, profile JSON | `phase-7` |
+| Phase 8 | DONE | Self-host — selfhost/{lexer,parser}.bl mirror current compiler | `phase-8` |
+| Phase 9 | ETA v1.0.0 | Ecosystem — balua-fmt/lsp/dbg/prof/doc/test/bindgen, blpkg.io, docs | `v1.0.0` |
 
 ---
 
