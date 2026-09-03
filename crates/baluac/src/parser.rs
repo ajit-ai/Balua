@@ -62,11 +62,11 @@ impl Parser {
         let mut items = Vec::new();
 
         while !self.at_eof() {
-            // skip comments
             if self.peek().kind == TokenKind::Comment {
                 self.advance();
                 continue;
             }
+            if self.check("}") { self.advance(); continue; }
             match self.parse_item() {
                 Ok(item) => items.push(item),
                 Err(d) => {
@@ -428,6 +428,27 @@ impl Parser {
                 let is_mut = if self.check("mut") { self.advance(); true } else { false };
                 let inner = Box::new(self.parse_expr()?);
                 Expr::BorrowExpr { inner, is_mut, lifetime: None }
+            }
+            _ if tok.lexeme == "match" => {
+                let expr = self.parse_expr()?;
+                self.expect("{")?;
+                let mut arms = Vec::new();
+                while !self.check("}") && !self.at_eof() {
+                    let pat = self.advance().lexeme;
+                    self.expect("=>")?;
+                    let arm_expr = self.parse_expr()?;
+                    arms.push(MatchArm { pattern: pat, expr: arm_expr });
+                    if self.check(",") { self.advance(); }
+                }
+                self.expect("}")?;
+                Expr::Match { expr: Box::new(expr), arms }
+            }
+            _ if tok.lexeme == "if" => {
+                self.advance();
+                let cond = self.parse_expr()?;
+                let then_block = self.parse_block()?;
+                let else_block = if self.check("else") { self.advance(); Some(Box::new(Expr::Block(self.parse_block()?))) } else { None };
+                Expr::If { cond: Box::new(cond), then_block: Box::new(then_block), else_block }
             }
             _ => Expr::Ident(tok.lexeme),
         };
