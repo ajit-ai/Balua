@@ -270,6 +270,34 @@ pub enum Expr {
     Select { arms: Vec<SelectArm> },
 }
 
+impl Expr {
+    /// Returns a representative span for this expression.
+    /// Used as a TypeTable key. Phase 1: returns a default span;
+    /// Phase 2 can attach real per-expression spans if needed.
+    pub fn span(&self) -> Span {
+        match self {
+            Expr::Literal(_lit) => Span { file: String::new(), line: 0, col: 0, end_line: 0, end_col: 0 },
+            Expr::Ident(_) => Span { file: String::new(), line: 0, col: 0, end_line: 0, end_col: 0 },
+            Expr::Binary { lhs, .. } => lhs.span(),
+            Expr::Call { callee, .. } => callee.span(),
+            Expr::OwnershipExpr { inner, .. } => inner.span(),
+            Expr::BorrowExpr { inner, .. } => inner.span(),
+            Expr::LifetimeAnnotation { expr, .. } => expr.span(),
+            Expr::Unsafe(ub) => ub.span.clone(),
+            Expr::Block(b) => b.span.clone(),
+            Expr::If { then_block, .. } => then_block.span.clone(),
+            Expr::Match { expr, .. } => expr.span(),
+            Expr::Cast { expr, .. } => expr.span(),
+            Expr::For { body, .. } => body.span.clone(),
+            Expr::Spawn { task } => task.span(),
+            Expr::ChanCreate { .. } => Span { file: String::new(), line: 0, col: 0, end_line: 0, end_col: 0 },
+            Expr::ChanSend { chan, .. } => chan.span(),
+            Expr::ChanRecv { chan } => chan.span(),
+            Expr::Select { arms } => arms.first().map(|a| a.span.clone()).unwrap_or(Span { file: String::new(), line: 0, col: 0, end_line: 0, end_col: 0 }),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum Literal {
     Int(i128, String),   // value + suffix
