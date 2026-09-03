@@ -26,7 +26,7 @@ log.workspace = true
 env_logger.workspace = true
 
 [features]
-llvm = [] # enable real llvm-sys 18 linking for v0.5+ (needs LLVM 18 on PATH, heavy on 4GB)
+llvm = []
 default = []
 
 [dev-dependencies]
