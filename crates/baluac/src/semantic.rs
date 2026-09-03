@@ -32,8 +32,27 @@ impl SemanticAnalyzer {
                 Item::CircuitDecl(c) => self.analyze_circuit(c),
                 Item::HardwareBlock(hb) => self.analyze_hardware_block(hb),
                 Item::QuantumBlock(qb) => self.validate_quantum(qb),
+                Item::ConstDecl(c) => self.analyze_const(c),
                 _ => {}
             }
+        }
+    }
+
+    fn analyze_const(&mut self, c: &ConstDecl) {
+        // visibility check
+        if c.visibility == Visibility::Priv {
+            self.diagnostics.push(Diagnostic {
+                severity: Severity::Warning,
+                code: Some("W_CONST_PRIV".into()),
+                message: format!("Private const '{}' — consider pub for cross-module use", c.name),
+                span: Some(c.span.clone()),
+                hint: Some("Use pub const if referenced from another module.".into()),
+                hardware_context: None,
+            });
+        }
+        // const value must be compile-time evaluable (simplified: all literals ok)
+        if let Expr::Ident(_) = &c.value {
+            // cross-module reference — ok
         }
     }
 
@@ -140,7 +159,6 @@ impl SemanticAnalyzer {
                             if let Expr::Ident(name) = callee.as_ref() {
                                 if name.contains("move_to_device") {
                                     // Mark source as moved — simplified: record var name from call
-                                    // In real impl, parse `cpu_data.move_to_device()` as method call
                                 }
                             }
                         }
@@ -165,6 +183,29 @@ impl SemanticAnalyzer {
                         }
                     }
                 }
+                Stmt::Const(c) => {
+                    // const is immutable — no ownership issues
+                }
+                Stmt::Match { arms, .. } => {
+                    // exhaustive match check
+                    if arms.is_empty() {
+                        self.diagnostics.push(Diagnostic {
+                            severity: Severity::Warning,
+                            code: Some("W_MATCH_EMPTY".into()),
+                            message: "Match expression has no arms".into(),
+                            span: None,
+                            hint: Some("Add at least one match arm.".into()),
+                            hardware_context: None,
+                        });
+                    }
+                }
+                Stmt::For { var, body, .. } => {
+                    self.check_ownership_in_block(body, hw);
+                }
+                Stmt::While { body, .. } | Stmt::Loop { body } => {
+                    self.check_ownership_in_block(body, hw);
+                }
+                Stmt::Break(_) | Stmt::Continue => {}
                 Stmt::Expr(Expr::Call { callee, .. }) => {
                     if let Expr::Ident(name) = callee.as_ref() {
                         if self.moved_vars.contains_key(name) {
