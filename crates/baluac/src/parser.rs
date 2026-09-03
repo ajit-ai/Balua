@@ -93,7 +93,7 @@ impl Parser {
     fn synchronize(&mut self) {
         while !self.at_eof() && !self.check(";") && !self.check("}") {
             self.advance();
-            if self.check("fn") || self.check("let") || self.check("struct") || self.check("enum") {
+            if self.check("fn") || self.check("let") || self.check("const") || self.check("struct") || self.check("enum") || self.check("match") || self.check("for") || self.check("while") || self.check("loop") || self.check("return") || self.check("break") || self.check("continue") || self.check("unsafe") {
                 break;
             }
         }
@@ -188,6 +188,7 @@ impl Parser {
                 }))
             }
             "let" => Ok(Item::VarDecl(self.parse_var_decl()?)),
+            "const" => Ok(Item::ConstDecl(self.parse_const_decl()?)),
             "struct" => Ok(Item::StructDecl(self.parse_struct()?)),
             "enum" => Ok(Item::EnumDecl(self.parse_enum()?)),
             "trait" => Ok(Item::TraitDecl(self.parse_trait()?)),
@@ -269,6 +270,9 @@ impl Parser {
         } else { None };
 
         self.expect("fn")?;
+        let visibility = if self.check("pub") { self.advance(); Visibility::Pub }
+            else if self.check("priv") { self.advance(); Visibility::Priv }
+            else { Visibility::Default };
         let name = self.advance().lexeme; // ident
         // generics <...>
         let generics = if self.check("<") {
@@ -280,6 +284,18 @@ impl Parser {
             }
             self.expect(">")?;
             g
+        } else { vec![] };
+        // where clause
+        let where_clause = if self.check("where") {
+            self.advance();
+            let mut w = Vec::new();
+            while !self.check("{") && !self.check(";") && !self.at_eof() {
+                let ty = self.advance().lexeme;
+                let bound = if self.check(":") { self.advance(); self.advance().lexeme } else { String::new() };
+                w.push((ty, bound));
+                if self.check(",") { self.advance(); }
+            }
+            w
         } else { vec![] };
 
         self.expect("(")?;
@@ -306,7 +322,7 @@ impl Parser {
 
         let body = if self.check("{") { Some(self.parse_block()?) } else if self.check(";") { self.advance(); None } else { None };
 
-        Ok(FnDecl { name, generics, params, ret_ty, hardware, is_async, is_extern, body, span: start })
+        Ok(FnDecl { name, generics, where_clause, params, ret_ty, hardware, is_async, is_extern, visibility, body, span: start })
     }
 
     fn parse_type(&mut self) -> Result<TypeExpr, Diagnostic> {
@@ -373,8 +389,22 @@ impl Parser {
         Ok(VarDecl { name, ty, init, is_mut, ownership: Ownership::Owned, span })
     }
 
+    fn parse_const_decl(&mut self) -> Result<ConstDecl, Diagnostic> {
+        let span = self.peek().span.clone();
+        self.expect("const")?;
+        let visibility = if self.check("pub") { self.advance(); Visibility::Pub }
+            else if self.check("priv") { self.advance(); Visibility::Priv }
+            else { Visibility::Default };
+        let name = self.advance().lexeme;
+        let ty = if self.check(":") { self.advance(); Some(self.parse_type()?) } else { None };
+        self.expect("=")?;
+        let value = self.parse_expr()?;
+        if self.check(";") { self.advance(); }
+        Ok(ConstDecl { name, ty, value, visibility, span })
+    }
+
     fn parse_expr(&mut self) -> Result<Expr, Diagnostic> {
-        // very minimal: ident / literal / call / binary
+        // very minimal: ident / literal / call / binary / cast
         let tok = self.advance();
         let mut expr = match tok.kind {
             TokenKind::LiteralInt => Expr::Literal(Literal::Int(tok.lexeme.parse().unwrap_or(0), tok.lexeme)),
@@ -400,6 +430,12 @@ impl Parser {
             self.expect(")")?;
             expr = Expr::Call { callee: Box::new(expr), args };
         }
+        // cast: expr as Type
+        if self.check("as") {
+            self.advance();
+            let ty = self.parse_type()?;
+            expr = Expr::Cast { expr: Box::new(expr), ty };
+        }
         if self.peek().kind == TokenKind::Operator {
             let op = self.advance().lexeme;
             let rhs = self.parse_expr()?;
@@ -416,11 +452,58 @@ impl Parser {
             if self.peek().kind == TokenKind::Comment { self.advance(); continue; }
             if self.check("let") {
                 stmts.push(Stmt::Let(self.parse_var_decl()?));
+            } else if self.check("const") {
+                stmts.push(Stmt::Const(self.parse_const_decl()?));
             } else if self.check("return") {
                 self.advance();
                 let e = if !self.check(";") && !self.check("}") { Some(self.parse_expr()?) } else { None };
                 if self.check(";") { self.advance(); }
                 stmts.push(Stmt::Return(e));
+            } else if self.check("match") {
+                self.advance();
+                let expr = self.parse_expr()?;
+                self.expect("{")?;
+                let mut arms = Vec::new();
+                while !self.check("}") && !self.at_eof() {
+                    let pat = self.advance().lexeme;
+                    self.expect("=>")?;
+                    let arm_expr = self.parse_expr()?;
+                    arms.push(MatchArm { pattern: pat, expr: arm_expr });
+                    if self.check(",") { self.advance(); }
+                }
+                self.expect("}")?;
+                stmts.push(Stmt::Match { expr, arms });
+            } else if self.check("for") {
+                self.advance();
+                let var = self.advance().lexeme;
+                self.expect("in")?;
+                let iter = self.parse_expr()?;
+                let body = self.parse_block()?;
+                stmts.push(Stmt::For { var, iter, body });
+            } else if self.check("while") {
+                self.advance();
+                let cond = self.parse_expr()?;
+                let body = self.parse_block()?;
+                stmts.push(Stmt::While { cond, body });
+            } else if self.check("loop") {
+                self.advance();
+                let body = self.parse_block()?;
+                stmts.push(Stmt::Loop { body });
+            } else if self.check("break") {
+                self.advance();
+                let e = if !self.check(";") && !self.check("}") { Some(self.parse_expr()?) } else { None };
+                if self.check(";") { self.advance(); }
+                stmts.push(Stmt::Break(e));
+            } else if self.check("continue") {
+                self.advance();
+                if self.check(";") { self.advance(); }
+                stmts.push(Stmt::Continue);
+            } else if self.check("if") {
+                self.advance();
+                let cond = self.parse_expr()?;
+                let then_block = self.parse_block()?;
+                let else_block = if self.check("else") { self.advance(); Some(Box::new(Expr::Block(self.parse_block()?))) } else { None };
+                stmts.push(Stmt::Expr(Expr::If { cond: Box::new(cond), then_block: Box::new(then_block), else_block }));
             } else {
                 let e = self.parse_expr()?;
                 if self.check(";") { self.advance(); }
