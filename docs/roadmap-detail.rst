@@ -150,16 +150,30 @@ Post-GA backlog (each: own ``phase/*`` + executable exit + tag)
 Gate table
 ----------
 
-+------+------------+----------------------------------+---------------+
-| Gate | Depends on | Proves                         | Tag           |
-+======+============+==================================+===============+
-| M1   | M0 done    | package builds real exe        | phase-3-local |
-+------+------------+----------------------------------+---------------+
-| M2   | M1         | unsafe rejected                | phase-5-min   |
-+------+------------+----------------------------------+---------------+
-| M3   | M2         | DX + repro                     | v1.0-ga-rc    |
-+------+------------+----------------------------------+---------------+
-| M4   | M3         | fresh-VM install               | v1.0-ga       |
-+------+------------+----------------------------------+---------------+
-| E*   | M4         | one HW/runtime axis each       | phase-N each  |
-+------+------------+----------------------------------+---------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Gate
+     - Depends on
+     - Proves
+     - Tag
+   * - M1
+     - M0 done
+     - package builds real exe
+     - phase-3-local
+   * - M2
+     - M1
+     - unsafe rejected
+     - phase-5-min
+   * - M3
+     - M2
+     - DX + repro
+     - v1.0-ga-rc
+   * - M4
+     - M3
+     - fresh-VM install
+     - v1.0-ga
+   * - E*
+     - M4
+     - one HW/runtime axis each
+     - phase-N each

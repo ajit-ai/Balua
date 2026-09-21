@@ -187,7 +187,7 @@ BLRS Ch.13. All ``no_std`` compatible with ``no_std`` feature.
   ``examples/08_rtos_control_loop.bl:1`` (10kHz PID, certified).
 
 11. Package manager (``blpkg`` / ``BPM``)
-----------------------------------------
+-----------------------------------------
 
 - Commands (BLRS Ch.14): ``new/build/run/test/bench/add/publish/doc/fmt/lint/cross``.
 - Sources: ``crates/blpkg/src/resolver.rs:1`` (PubGrub),

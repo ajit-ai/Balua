@@ -18,26 +18,30 @@ See ``spec/NFR-roadmap-v2.md:18``.
 Grounded ledger (2026-09-03 audit + 2026-09-21 git)
 ---------------------------------------------------
 
-+------------------------------------------+------------+-------------------------------------------+
-| Phase                                    | Status     | Verified by / evidence                  |
-+==========================================+============+===========================================+
-| Phase 1 — Wire semantic to type/borrow   | VERIFIED   | ``crates/baluac/tests/semantic_tests.rs`` |
-|                                          | 2026-09-03 | (8 tests pass); ``cc7d74c``               |
-+------------------------------------------+------------+-------------------------------------------+
-| Phase 2 — One real CPU backend           | IN PROGRESS| ``77a2af1`` + ``3340e6c`` merge          |
-| (Cranelift) end to end                   | (working   | ``phase/2-cranelift -> develop``          |
-|                                          | now)       |                                           |
-+------------------------------------------+------------+-------------------------------------------+
-| Phase 3 — ``blpkg`` builds/runs projects | NOT STARTED| stub: ``resolver``, ``registry``,        |
-|                                          |            | ``builder``, ``bom``                      |
-+------------------------------------------+------------+-------------------------------------------+
-| Phase 4 — Self-host bootstrap            | NOT STARTED| ``selfhost/*.bl`` stub/mirror only      |
-+------------------------------------------+------------+-------------------------------------------+
-| Phase 5 — Safety that analyzes           | NOT STARTED| ``safety/*.rs`` stubs                   |
-+------------------------------------------+------------+-------------------------------------------+
-| Phase 6+ — Hardware targets              | NOT STARTED| ``backend/`` (except ``cranelift.rs``), |
-| (GPU/FPGA/NPU/Quantum)                   |            | ``std/hal/*.bl``, ``std/ffi/*.bl`` stubs |
-+------------------------------------------+------------+-------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Phase
+     - Status
+     - Verified by / evidence
+   * - Phase 1 — Wire semantic to type/borrow
+     - VERIFIED 2026-09-03
+     - ``crates/baluac/tests/semantic_tests.rs`` (8 tests pass); ``cc7d74c``
+   * - Phase 2 — One real CPU backend (Cranelift) end to end
+     - IN PROGRESS (working now)
+     - ``77a2af1`` + ``3340e6c`` merge ``phase/2-cranelift -> develop``
+   * - Phase 3 — ``blpkg`` builds/runs projects
+     - NOT STARTED
+     - stub: ``resolver``, ``registry``, ``builder``, ``bom``
+   * - Phase 4 — Self-host bootstrap
+     - NOT STARTED
+     - ``selfhost/*.bl`` stub/mirror only
+   * - Phase 5 — Safety that analyzes
+     - NOT STARTED
+     - ``safety/*.rs`` stubs
+   * - Phase 6+ — Hardware targets (GPU/FPGA/NPU/Quantum)
+     - NOT STARTED
+     - ``backend/`` (except ``cranelift.rs``), ``std/hal/*.bl``, ``std/ffi/*.bl`` stubs
 
 Audit note: real and working are ``lexer.rs``, ``parser.rs``, ``ast.rs``,
 basic ``mir.rs``, ``diagnostics.rs``. Orphaned-until-Phase-1 (now wired):

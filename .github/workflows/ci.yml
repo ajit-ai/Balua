@@ -29,4 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: test -f docs/index.html -a -f docs/language.html -a -f docs/features.html -a -f docs/principles.html -a -f docs/roadmap.html
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r docs/requirements.txt
+      - run: sphinx-build -b html -W docs docs/_build/html

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balua Architecture</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;line-height:1.6;color:#1a1a1a}
+nav{background:#0b2a4a;color:#fff;padding:.7em 1em;border-radius:8px}
+nav a{color:#9fd0ff;margin-right:.8em;text-decoration:none;font-size:.92em}
+code{background:#f2f4f8;padding:.1em .35em;border-radius:4px}
+pre{background:#0f172a;color:#e2e8f0;padding:1em;border-radius:8px;overflow:auto}
+h1,h2{color:#0b2a4a} h2{border-bottom:2px solid #dbe4f0;padding-bottom:.2em}
+</style>
+</head>
+<body>
+<nav><strong>Balua Docs</strong> &nbsp; <a href="index.html">Index</a><a href="language.html">Language</a><a href="features.html">Features</a><a href="principles.html">Principles</a><a href="compiler.html">Compiler</a><a href="architecture.html">Arch</a><a href="heterogeneous.html">Hetero</a><a href="safety.html">Safety</a><a href="packages.html">Packages</a><a href="examples.html">Examples</a><a href="development.html">Dev</a><a href="changelog.html">Changes</a><a href="roadmap.html">Roadmap</a><a href="roadmap-detail.html">Detail</a></nav>
+<h1>Balua Architecture</h1>
+<pre>.bl → Lexer → Parser → AST → Semantic(+TypeTable) → MIR → Backend → host link → exe</pre>
+<p>Driver <code>main.rs:65</code> orchestrates inline and gates <code>-o</code> on zero errors. Details: <a href="compiler.html">Compiler</a>, <a href="safety.html">Safety</a>, <a href="roadmap-detail.html">phase plan</a>.</p>
+<h2>Load-bearing contracts</h2>
+<ol>
+<li>Spans mostly default — type table is coverage-grade.</li>
+<li>MIR registers/params are strings; <code>Phi</code> unused by backend.</li>
+<li><code>Backend::lower -&gt; String</code> lets template backends pass with comments.</li>
+<li>Two linkers: real <code>object_emit</code> vs unused <code>baluald</code> — one must go.</li>
+<li>Top-level <code>module</code> blocks parse; nested rejected; <code>use</code> unresolved; <code>std/</code> never read.</li>
+<li>No runtime — standalone exes, exit-code I/O; strings/collections unrepresented.</li>
+<li>Safety is MIR walkers over CPU functions; tiers are labels; HW regions skipped.</li>
+<li><code>Balua.toml</code> read by <code>blpkg</code> only.</li>
+</ol>
+<h2>Decisions on record</h2>
+<p>Hardware-first syntax, ownership without GC, HM-style inference, C-ABI intent, sim-fallback HAL, Cranelift-first on 4GB budget, <code>develop → main --no-ff</code>. Phases: <a href="roadmap.html">Roadmap</a>.</p>
+</body>
+</html>
