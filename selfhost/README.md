@@ -1,8 +1,8 @@
 # v0.5 Self-Host Prep
 
-Goal: balua.exe builds balua components written in Balua (selfhost/*.bl) — first step to baluac-in-Balua (v1.0).
+Goal: balua.exe builds balua components written in Balua (selfhost/*.bl) â€” first step to baluac-in-Balua (v1.0).
 
-- selfhost/lexer.bl — mirrors crates/baluac/src/lexer.rs (TokenKind, Span, HardwareDirective)
+- selfhost/lexer.bl â€” mirrors crates/baluac/src/lexer.rs (TokenKind, Span, HardwareDirective)
 - Next: selfhost/parser.bl (mirrors parser.rs), selfhost/ast.bl
 
 Validate:

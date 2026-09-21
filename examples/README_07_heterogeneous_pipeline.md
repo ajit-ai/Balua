@@ -1,4 +1,4 @@
-# 07_heterogeneous_pipeline — CPU?GPU?NPU?CPU end-to-end, single binary via baluald fat-binary.
+# 07_heterogeneous_pipeline â€” CPU?GPU?NPU?CPU end-to-end, single binary via baluald fat-binary.
 
 CPU?GPU?NPU?CPU end-to-end, single binary via baluald fat-binary.
 

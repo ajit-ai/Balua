@@ -1,6 +1,6 @@
-# 06_quantum_grover � Grover 4-qubit unstructured search, OpenQASM3. Target: lpkg build --target quantum:ibm:fake_manila.
+﻿# 06_quantum_grover — Grover 4-qubit unstructured search, OpenQASM3. Target: blpkg build --target quantum:ibm:fake_manila.
 
-Grover 4-qubit unstructured search, OpenQASM3. Target: lpkg build --target quantum:ibm:fake_manila.
+Grover 4-qubit unstructured search, OpenQASM3. Target: blpkg build --target quantum:ibm:fake_manila.
 
 Build:
 ``powershell

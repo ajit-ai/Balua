@@ -1,2 +1,2 @@
-// std::string — String, str, format!, UTF-8
+// std::string â€” String, str, format!, UTF-8
 module std::string { pub struct String { data: [u8; 0] } pub type str = [u8]; }

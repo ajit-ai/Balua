@@ -1,2 +1,2 @@
-// std::net — TCP, UDP, Unix sockets, async I/O
+// std::net â€” TCP, UDP, Unix sockets, async I/O
 module std::net { pub struct TcpListener; pub struct UdpSocket; }

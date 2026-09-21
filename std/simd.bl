@@ -1,2 +1,2 @@
-// std::simd — v128/v256/v512 vector ops
+// std::simd â€” v128/v256/v512 vector ops
 module std::simd { pub type v128<T> = [T; 4]; pub type v256<T> = [T; 8]; }

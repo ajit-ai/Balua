@@ -1,6 +1,6 @@
-# 08_rtos_control_loop � PID 10kHz STM32H7, #![no_std] #![no_panic], max_stack+wcet. Target: lpkg cross arm-none-eabi.
+﻿# 08_rtos_control_loop — PID 10kHz STM32H7, #![no_std] #![no_panic], max_stack+wcet. Target: blpkg cross arm-none-eabi.
 
-PID 10kHz STM32H7, #![no_std] #![no_panic], max_stack+wcet. Target: lpkg cross arm-none-eabi.
+PID 10kHz STM32H7, #![no_std] #![no_panic], max_stack+wcet. Target: blpkg cross arm-none-eabi.
 
 Build:
 ``powershell

@@ -1,2 +1,2 @@
-// std::panic — Panic handler, backtraces, abort
+// std::panic â€” Panic handler, backtraces, abort
 module std::panic { pub fn handler(msg: str) -> ! { loop {} } }
