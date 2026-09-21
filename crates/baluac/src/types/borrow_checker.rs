@@ -8,7 +8,7 @@ use std::collections::HashMap;
 pub enum BorrowKind { Shared, Mut }
 
 #[derive(Debug)]
-struct Loan { var: String, kind: BorrowKind, alive: bool }
+struct Loan { kind: BorrowKind, alive: bool }
 
 pub struct BorrowChecker {
     loans: HashMap<String, Vec<Loan>>,
@@ -34,7 +34,7 @@ impl BorrowChecker {
                 .with_code("E_BORROW_CONFLICT")
                 .with_hint("Mutable borrow is exclusive."));
         }
-        entry.push(Loan { var: var.to_string(), kind, alive: true });
+        entry.push(Loan { kind, alive: true });
     }
 
     /// Move semantics: moving to GPU invalidates CPU handle

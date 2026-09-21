@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balua Documentation — Index</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;max-width:960px;margin:2em auto;padding:0 1em;line-height:1.6;color:#1a1a1a}
+nav{background:#0b2a4a;color:#fff;padding:.7em 1em;border-radius:8px}
+nav a{color:#9fd0ff;margin-right:1em;text-decoration:none}
+nav a:hover{text-decoration:underline}
+code{background:#f2f4f8;padding:.1em .35em;border-radius:4px}
+pre{background:#0f172a;color:#e2e8f0;padding:1em;border-radius:8px;overflow:auto}
+h1,h2{color:#0b2a4a}
+.card{border:1px solid #dbe4f0;border-radius:8px;padding:1em;margin:1em 0}
+</style>
+</head>
+<body>
+<nav><strong>Balua Docs</strong> &nbsp; <a href="index.html">Index</a><a href="language.html">Language</a><a href="features.html">Features</a><a href="principles.html">Principles</a><a href="roadmap.html">Roadmap</a></nav>
+<h1>Balua Programming Language Documentation</h1>
+<p><strong>One Language. Every Silicon.</strong> — CPU · GPU · NPU · FPGA · Quantum · Embedded</p>
+<p>Version 1.0 | Language Design Authority | 2026. Documentation for the Balua language itself — syntax, types, ownership, hardware, stdlib, toolchain, examples. Mirror of <code>docs/*.rst</code>.</p>
+<div class="card"><h2>Project snapshot (2026-09-21)</h2>
+<ul>
+<li>Repository: <code>https://github.com/ajit-ai/Balua</code></li>
+<li>Branch: <code>develop</code> — clean working tree, no stash</li>
+<li>Last commit: <code>3340e6c</code> — merge <code>phase/2-cranelift -&gt; develop</code></li>
+<li>Workspace: <code>Cargo.toml:1</code> — <code>crates/baluac</code>, <code>crates/blpkg</code></li>
+<li>Spec: <code>spec/BLRS-v1.0.md:1</code>, Grammar <code>spec/grammar/balua.ebnf:1</code>, ABI <code>spec/abi/balua-abi-v1.md:1</code></li>
+<li>Grounded ledger: <code>spec/NFR-roadmap-v2.md:7</code> | Legacy roadmap: <code>spec/NFR-roadmap.md:18</code></li>
+</ul></div>
+<h2>Quick start</h2>
+<pre>cargo build
+cargo run -p baluac -- examples/01_hello_hardware.bl --emit-mir
+cargo run -p baluac -- examples/03_gpu_matrix_multiply.bl --emit-llvm --target x86_64 --json-diagnostics
+cargo run -p blpkg -- new my_app
+cargo run -p blpkg -- build --target gpu:cuda:sm90</pre>
+<p>See <code>README.md:11</code>.</p>
+<h2>Contents</h2>
+<ul><li><a href="language.html">Language</a> — syntax to HAL with examples</li><li><a href="features.html">Features</a> — complete catalogue</li><li><a href="principles.html">Principles</a> — design principles</li><li><a href="roadmap.html">Roadmap</a> — roadmap only</li></ul>
+<p>License: MIT OR Apache-2.0.</p>
+</body>
+</html>

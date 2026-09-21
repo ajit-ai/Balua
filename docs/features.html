@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balua Features</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;line-height:1.6;color:#1a1a1a}
+nav{background:#0b2a4a;color:#fff;padding:.7em 1em;border-radius:8px}
+nav a{color:#9fd0ff;margin-right:1em;text-decoration:none}
+code{background:#f2f4f8;padding:.1em .35em;border-radius:4px}
+pre{background:#0f172a;color:#e2e8f0;padding:1em;border-radius:8px;overflow:auto}
+h1,h2{color:#0b2a4a} h2{border-bottom:2px solid #dbe4f0;padding-bottom:.2em}
+ul{margin:.4em 0}
+</style>
+</head>
+<body>
+<nav><strong>Balua Docs</strong> &nbsp; <a href="index.html">Index</a><a href="language.html">Language</a><a href="features.html">Features</a><a href="principles.html">Principles</a><a href="roadmap.html">Roadmap</a></nav>
+<h1>Balua Features</h1>
+<p>Sources: <code>spec/BLRS-v1.0.md:1</code>, <code>spec/grammar/balua.ebnf:1</code>, <code>spec/abi/balua-abi-v1.md:1</code>, <code>README.md:52</code>, <code>crates/baluac/src/main.rs:11</code>, <code>crates/baluac/src/backend/mod.rs:21</code>.</p>
+<h2>1. Language core</h2>
+<ul><li>Statically-typed compiled system language. Files: <code>.bl</code>, <code>.blh</code>, <code>Balua.toml</code>, <code>balua.exe/baluac</code>, <code>blpkg/BPM.exe</code>, REPL <code>balua</code>.</li>
+<li>Lexical: UTF-8 Unicode, <code>@hw::</code> directives, <code>#[...]</code> / <code>#pragma</code>. ~40 keywords: <code>fn let mut const struct enum trait impl mod module use if else for while loop match return break continue unsafe async await spawn chan select extern type where pub self Self super crate box move in as is kernel circuit tensor qubit true false</code>.</li>
+<li>Control flow: <code>let if/else for/while/loop match return spawn chan select! unsafe</code>. Functions: <code>fn async fn extern kernel fn circuit fn tensor fn</code>, closures borrow/move. Effects: <code>Pure | IO | HardwareIO | Unsafe</code>.</li>
+<li>Modules: <code>module</code>, <code>use hw::cuda::Grid;</code>, <code>Balua.toml:12</code> with <code>[hardware]</code> cpu/gpu/npu/fpga/quantum.</li></ul>
+<h2>2. Type system</h2>
+<ul><li>Primitives <code>i8..i128 u8..u128 f16/f32/f64/f128 fp16/bf16/tf32 bool char qubit[N] *mut/*const/&amp;/&amp;mut v128/v256/v512</code>; struct/enum/trait, <code>Tensor&lt;T,Shape&gt;</code>, <code>stream&lt;T&gt;</code>, <code>GpuTensor</code>, <code>FpgaBuf</code>, const generics (dimension mismatch = compile error).</li>
+<li>Semantic: HM inference (<code>types/inference.rs:1</code>) + borrow (<code>types/borrow_checker.rs:1</code>) + lifetimes (<code>types/lifetime.rs:1</code>) + hw types + effects. Errors <code>E_TYPE_MISMATCH E_BORROW_CONFLICT E_USE_AFTER_MOVE</code>.</li></ul>
+<h2>3. Memory &amp; ownership</h2>
+<ul><li>Single owner, move, <code>box&lt;T&gt;::new</code>, <code>'a</code>, <code>x.move_to_device()</code> invalidates <code>x</code>, cross-device lifetimes.</li></ul>
+<h2>4. Compiler pipeline</h2>
+<ul><li>Lexer (<code>lexer.rs:1</code>) → Parser (<code>parser.rs:1</code>, <code>ast.rs:1</code>) → Semantic (<code>semantic.rs:1</code>) → MIR SSA (<code>mir.rs:1</code>) → Backends → <code>baluald</code> (<code>linker/baluald.rs:1</code>).</li>
+<li>CLI: <code>--emit-llvm --emit-mir --emit-clif --target --backend --cpu-backend llvm|cranelift -o --keep-object --json-diagnostics --safety-profile --verbose</code>.</li></ul>
+<h2>5. Backends</h2>
+<ul><li><code>select_backend(hw)</code> (<code>backend/mod.rs:21</code>): LLVM (x86_64/aarch64/riscv64/arm-none-eabi, LTO/PGO/BOLT), Cranelift + <code>object_emit.rs:1 build_executable</code> → linked <code>.exe</code>, PTX SM70-90, SPIR-V 1.6, HLS Vitis + Tcl/xdc, OpenQASM3/Q#, MLIR <code>balua</code> dialect. Fat binary ELF+CUBIN+SPIR-V+bitstream+QASM + <code>__balua_hw_manifest</code>.</li>
+<li>ABI: C stable, <code>_Bl&lt;N&gt;...</code> mangling, <code>#[export_c]</code>, PTX <code>.entry</code>, SPIR-V <code>OpEntryPoint</code>, HLS <code>m_axi/axis</code>, ONNX NCHW, QASM measure.</li></ul>
+<h2>6. Hardware abstractions</h2>
+<ul><li><code>@hw::gpu(backend=cuda,sm=90) @hw::fpga(target=ultrascale_plus) @hw::npu(backend=onnx) @hw::quantum(backend=openqasm3) @hw::cpu @hw::embedded</code>. Per-region codegen then stitch.</li></ul>
+<h2>7. Concurrency</h2>
+<ul><li><code>spawn chan&lt;T&gt; select! Future async/await Mutex/RwLock/Condvar</code>, <code>Send/Sync</code> inferred. Example <code>examples/01b_parallelism.bl:1</code>.</li></ul>
+<h2>8. Standard library</h2>
+<ul><li><code>std/</code>: core mem alloc collections string io fs net thread sync atomic time math simd tensor hal ffi panic test fmt iter future log. <code>no_std</code> compatible. HAL <code>std/hal/</code> cpu/gpu/npu/fpga/quantum/embedded/memory with sim fallback <code>#[test(sim=true)]</code>.</li></ul>
+<h2>9. FFI</h2>
+<ul><li><code>extern "C/C++/rust/cuda/opencl"</code>, Python, VHDL/Verilog, WASM, <code>balua-bindgen → .blh</code>.</li></ul>
+<h2>10. Safety</h2>
+<ul><li><code>--safety-profile=AUTOSAR_CPP14|DO-178C|IEC61508</code>, <code>#[max_stack] #[wcet_cycles] #[interrupt_handler] #[requires]/[ensures] #![no_panic] #[sandbox]</code>, MISRA/WCET/stack/Frama-C/CBMC, <code>Bom.toml</code> SBOM.</li></ul>
+<h2>11. Package manager</h2>
+<ul><li><code>new/build/run/test/bench/add/publish/doc/fmt/lint/cross</code>, PubGrub resolver, builder, registry (<code>blpkg.io</code>), checksums/lockfile/provenance. Targets <code>gpu:cuda:sm90 fpga:xilinx:ultrascale_plus quantum:ibm:fake_manila arm-none-eabi</code>.</li></ul>
+<h2>12. Toolchain DX</h2>
+<ul><li><code>balua-fmt lsp(3.17) dbg prof doc test bindgen</code> in <code>tools/</code>. Compile events, <code>--verbose</code>, profile JSON, JSON diagnostics.</li></ul>
+<h2>13. Reference programs</h2>
+<ul><li><code>examples/01_hello_hardware.bl</code> → <code>10_balua_os_kernel.bl</code> + <code>01a-06a</code> variants; <code>selfhost/lexer.bl parser.bl</code> mirror compiler.</li></ul>
+</body>
+</html>

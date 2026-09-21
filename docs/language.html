@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balua Programming Language Guide</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;line-height:1.6;color:#1a1a1a}
+nav{background:#0b2a4a;color:#fff;padding:.7em 1em;border-radius:8px}
+nav a{color:#9fd0ff;margin-right:1em;text-decoration:none}
+code{background:#f2f4f8;padding:.1em .35em;border-radius:4px}
+pre{background:#0f172a;color:#e2e8f0;padding:1em;border-radius:8px;overflow:auto}
+h1,h2{color:#0b2a4a} h2{border-bottom:2px solid #dbe4f0;padding-bottom:.2em}
+</style>
+</head>
+<body>
+<nav><strong>Balua Docs</strong> &nbsp; <a href="index.html">Index</a><a href="language.html">Language</a><a href="features.html">Features</a><a href="principles.html">Principles</a><a href="roadmap.html">Roadmap</a></nav>
+<h1>Balua Programming Language Guide</h1>
+<p><strong>One Language. Every Silicon.</strong> Sources: <code>spec/BLRS-v1.0.md:1</code>, <code>spec/grammar/balua.ebnf:1</code>, <code>spec/abi/balua-abi-v1.md:1</code>.</p>
+<h2>1. Getting started</h2>
+<p>Files: <code>.bl .blh Balua.toml balua.exe/baluac blpkg/BPM.exe</code>.</p>
+<pre>cargo build
+cargo run -p baluac -- hello.bl -o hello.exe
+cargo run -p baluac -- examples/01_hello_hardware.bl --emit-mir
+cargo run -p baluac -- examples/03_gpu_matrix_multiply.bl --emit-llvm --target x86_64 --json-diagnostics</pre>
+<p>Flags (<code>main.rs:11</code>): <code>--emit-mir --emit-llvm --emit-clif --target --backend --cpu-backend -o --keep-object --json-diagnostics --safety-profile --verbose</code>.</p>
+<pre>fn hello() -&gt; i32 {
+    let name = "Balua";
+    let version = 1;
+    version
+}
+fn main() -&gt; i32 { let v = hello(); v }</pre>
+<p>Manifest <code>Balua.toml:1</code>: <code>[package] [hardware] cpu/gpu/npu/fpga/quantum [profile.release] lto</code>.</p>
+<h2>2. Lexical</h2>
+<p>UTF-8 Unicode. Tokens: KEYWORD IDENTIFIER LITERAL OPERATOR DELIMITER COMMENT <code>@hw::</code> <code>#[...]</code>. ~40 keywords: <code>fn let mut const struct enum trait impl mod module use if else for while loop match return break continue unsafe async await spawn chan select extern type where pub self Self super crate box move in as is kernel circuit tensor qubit true false</code>.</p>
+<h2>3. Modules</h2>
+<pre>module main {
+    use std::hal::cpu;
+    fn main() -&gt; i32 { 0 }
+}</pre>
+<h2>4. Types</h2>
+<p><code>i8..i128 u8..u128 f16/f32/f64/f128 fp16/bf16/tf32 bool char qubit[N] *mut/*const/&amp;/&amp;mut v128/v256/v512</code>, struct/enum/trait, <code>[T;N] [T] Tensor&lt;T,Shape&gt; stream&lt;T&gt; fn()-&gt;T</code>, <code>GpuTensor FpgaBuf</code>, const-generics <code>matmul&lt;M,K,N&gt;</code> (mismatch = error).</p>
+<h2>5. Variables</h2>
+<pre>pub const MAX_VAL: i32 = 100;
+priv const INTERNAL: i32 = 42;
+let mut result = 1;
+x as f32  // cast</pre>
+<h2>6. Functions</h2>
+<pre>fn add(a: i32, b: i32) -&gt; i32 { a + b }
+async fn fetch() -&gt; i32 { 0 }
+extern "C" fn puts(s: &amp;str) -&gt; i32;
+kernel fn matrix_mul(A: &amp;[f32], B: &amp;[f32], C: &amp;mut [f32], N: u32) -&gt; void { }
+circuit fn grover(q: qubit[5]) -&gt; bit[5] { }</pre>
+<p>Effects <code>Pure|IO|HardwareIO|Unsafe</code> must nest.</p>
+<h2>7. Control flow</h2>
+<pre>while i &gt; 1 { result = result * i; i = i - 1; }
+let r = match x { 1 =&gt; 10, 2 =&gt; 20, _ =&gt; 0 };
+for i in 0..10 { if i % 2 == 0 { continue } s = s + i }
+loop { i = i + 1; if i == 5 { break i } }</pre>
+<h2>8. Ownership</h2>
+<pre>let buf = box::new(data);
+let gpu_buf = buf.move_to_device(); // buf dead
+let r = &amp;gpu_buf; let w = &amp;mut gpu_buf;</pre>
+<p><code>E_TYPE_MISMATCH E_USE_AFTER_MOVE E_BORROW_CONFLICT</code>.</p>
+<h2>9. Concurrency</h2>
+<pre>spawn { let _x = 1 };
+let c = chan i32; send c 42; let _r = recv c;
+select { ch1 =&gt; { }, ch2 =&gt; { } }</pre>
+<h2>10. Safety</h2>
+<pre>pub fn safe_add(a: i32, b: i32) -&gt; i32 { a + b }
+#[max_stack(512)] #[wcet_cycles(1000)] #[interrupt_handler(IRQ=5)] #![no_panic]
+// balua --safety-profile=AUTOSAR_CPP14|DO-178C|IEC61508</pre>
+<h2>11. Hardware @hw::</h2>
+<pre>@hw::gpu(backend=cuda, sm=90)
+kernel fn matrix_mul(A: &amp;[f32], B: &amp;[f32], C: &amp;mut [f32], N: u32) -&gt; void { }
+@hw::fpga(target=ultrascale_plus, clock_mhz=250)
+@hw::npu(backend=onnx) @hw::quantum(backend=openqasm3, qubits=5) @hw::cpu @hw::embedded</pre>
+<h2>12. FFI/ABI</h2>
+<p><code>extern "C/C++/rust/cuda/opencl"</code>, C stable, <code>_BlN...</code>, <code>#[export_c]</code>, WASM, Python, VHDL/Verilog, <code>.blh</code>.</p>
+<h2>13. Stdlib</h2>
+<p><code>std/</code> core mem alloc collections string io fs net thread sync atomic time math simd tensor hal ffi panic test fmt iter future log, <code>no_std</code> ready. HAL cpu/gpu/npu/fpga/quantum/embedded/memory with sim fallback.</p>
+<h2>14. Toolchain</h2>
+<pre>blpkg new my_app
+blpkg build --target gpu:cuda:sm90
+blpkg build --target fpga:xilinx:ultrascale_plus
+blpkg run
+blpkg test</pre>
+<h2>15. Hello-hardware</h2>
+<pre>module main {
+    use std::hal::cpu;
+    fn main() -&gt; i32 {
+        println("Hello from Balua!");
+        println("CPU cores: {}", cpu::core_count());
+        0
+    }
+}</pre>
+<p>See <code>examples/01_hello_hardware.bl:1 01a_keywords.bl:1 01b_parallelism.bl:1 01c_safety_tiers.bl:1 03_gpu_matrix_multiply.bl:1</code>.</p>
+</body>
+</html>

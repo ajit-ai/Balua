@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balua Roadmap — Current Phase and Future Scope</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;line-height:1.6;color:#1a1a1a}
+nav{background:#0b2a4a;color:#fff;padding:.7em 1em;border-radius:8px}
+nav a{color:#9fd0ff;margin-right:1em;text-decoration:none}
+code{background:#f2f4f8;padding:.1em .35em;border-radius:4px}
+pre{background:#0f172a;color:#e2e8f0;padding:1em;border-radius:8px;overflow:auto}
+h1,h2{color:#0b2a4a}
+table{border-collapse:collapse;width:100%;margin:1em 0}
+th,td{border:1px solid #cbd5e1;padding:.5em;text-align:left}
+th{background:#e6eef8}
+.badge{display:inline-block;padding:.15em .6em;border-radius:999px;font-size:.85em;font-weight:700}
+.done{background:#dcfce7;color:#166534}.now{background:#fef9c3;color:#854d0e}.todo{background:#fee2e2;color:#991b1b}
+</style>
+</head>
+<body>
+<nav><strong>Balua Docs</strong> &nbsp; <a href="index.html">Index</a><a href="language.html">Language</a><a href="features.html">Features</a><a href="principles.html">Principles</a><a href="roadmap.html">Roadmap</a></nav>
+<h1>Balua Roadmap — Current Phase and Future Scope</h1>
+<p>Grounded ledger <code>spec/NFR-roadmap-v2.md:1</code> is source of truth. Legacy plan <code>spec/NFR-roadmap.md:1</code> is scaffold history.</p>
+<h2>Status legend</h2>
+<p><span class="badge done">VERIFIED</span> real + wired + executing test &nbsp; <span class="badge now">WIRED, SHALLOW</span> runs but thin &nbsp; ORPHANED = uncalled &nbsp; <span class="badge todo">STUB</span> signatures only.</p>
+<h2>Grounded ledger</h2>
+<table><tr><th>Phase</th><th>Status</th><th>Evidence</th></tr>
+<tr><td>Phase 1 — Wire semantic to type/borrow</td><td><span class="badge done">VERIFIED 2026-09-03</span></td><td><code>semantic_tests.rs</code> 8 pass; <code>cc7d74c</code></td></tr>
+<tr><td>Phase 2 — One real CPU backend (Cranelift)</td><td><span class="badge now">IN PROGRESS — working now</span></td><td><code>77a2af1</code> + <code>3340e6c</code> merge <code>phase/2-cranelift→develop</code></td></tr>
+<tr><td>Phase 3 — blpkg builds/runs</td><td><span class="badge todo">NOT STARTED</span></td><td>resolver/registry/builder/bom stubs</td></tr>
+<tr><td>Phase 4 — Self-host bootstrap</td><td><span class="badge todo">NOT STARTED</span></td><td><code>selfhost/*.bl</code> mirror only</td></tr>
+<tr><td>Phase 5 — Safety that analyzes</td><td><span class="badge todo">NOT STARTED</span></td><td><code>safety/*.rs</code> stubs</td></tr>
+<tr><td>Phase 6+ — Hardware targets</td><td><span class="badge todo">NOT STARTED</span></td><td><code>backend/</code> (except cranelift), <code>std/hal</code>, <code>std/ffi</code> stubs</td></tr>
+</table>
+<h2>Working now — Phase 2</h2>
+<pre>balua hello.bl -o hello.exe &amp;&amp; ./hello.exe</pre>
+<p>Uses Phase-1 <code>TypeTable</code> for CLIF types. Files: <code>backend/cranelift.rs:1 backend/object_emit.rs:1 mir.rs:1 backend/mod.rs:21 main.rs:144 tests/execution.rs:1 hello.bl:1</code>. Branches <code>develop phase/2-cranelift phase/10-selfhost-update</code>, tag <code>phase-1-semantic</code>. No <code>phase-2</code> tag until exe runs green (<code>spec/NFR-roadmap-v2.md:69</code>).</p>
+<h2>Future scope</h2>
+<ol><li><strong>Phase 3 Ecosystem:</strong> blpkg resolver→builder→runner, <code>BPM build/run/test</code>.</li>
+<li><strong>Phase 4 Self-host:</strong> <code>selfhost/ast.bl mir.bl semantic.bl lexer.bl parser.bl</code>; balua builds balua.</li>
+<li><strong>Phase 5 Safety:</strong> WCET/stack/MISRA/AUTOSAR/DO-178C/Frama-C/CBMC that analyzes.</li>
+<li><strong>Phase 6+ Hardware:</strong> PTX/CUBIN, SPIR-V, ONNX NPU, HLS xclbin, QASM fidelity with hardware-in-loop.</li></ol>
+<h2>Legacy plan (reference)</h2>
+<p><code>spec/NFR-roadmap.md:18</code> lists Phase 0–9 DONE to <code>v1.0.0</code> (2a keywords, 2b LLVM, 3 parallelism, 4 safety tiers+SBOM, 5 GPU/NPU, 6 FPGA/Quantum, 7 DX, 8 self-host lexer/parser, 9 ecosystem). Treat as scaffolded, not verified.</p>
+<h2>Git workflow</h2>
+<pre>git checkout develop
+git checkout -b phase/N-&lt;name&gt;
+# implement + cargo build/test
+git commit -m "feat(phase-N): &lt;name&gt;"
+git push origin develop
+git checkout main
+git merge --no-ff develop -m "merge: Phase-N → main (Balua v0.N.0)"
+git tag -a phase-N -m "Phase N complete"</pre>
+<p>See <code>GIT_WORKFLOW.md:15</code>.</p>
+</body>
+</html>

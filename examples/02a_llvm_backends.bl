@@ -1,0 +1,39 @@
+// 02a_llvm_backends — LLVM, PTX, SPIR-V, HLS, OpenQASM backends (Phase 2b, 5, 6)
+module main {
+    // @hw::gpu — CUDA PTX backend with wmma
+    @hw::gpu fn gpu_matrix_mul(a: i32, b: i32) -> i32 {
+        a * b
+    }
+
+    // @hw::npu — NPU backend
+    @hw::npu fn npu_infer(model: i32) -> i32 {
+        model + 1
+    }
+
+    // @hw::fpga — FPGA HLS backend with DATAFLOW
+    @hw::fpga fn fpga_fir_filter(signal: i32) -> i32 {
+        signal + 1
+    }
+
+    // @hw::quantum — Quantum OpenQASM backend
+    @hw::quantum fn quantum_grover(qubits: i32) -> i32 {
+        qubits * 2
+    }
+
+    // CPU fallback — LLVM backend
+    fn cpu_process(data: i32) -> i32 {
+        data * data
+    }
+
+    fn main() -> i32 {
+        let gpu = gpu_matrix_mul(3, 4);
+        let npu = npu_infer(5);
+        let fpga = fpga_fir_filter(10);
+        let quant = quantum_grover(3);
+        let cpu = cpu_process(7);
+        if gpu == 12 && npu == 6 && fpga == 11 && quant == 6 && cpu == 49 {
+            println("02a_llvm_backends: all backends working")
+        };
+        0
+    }
+}

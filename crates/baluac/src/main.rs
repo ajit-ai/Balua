@@ -33,9 +33,21 @@ struct Args {
     #[arg(long, default_value = "llvm")]
     cpu_backend: String,
 
+    /// Release mode: Cranelift opt_level 2 (speed). Default is debug (opt 0).
+    #[arg(long, default_value_t = false)]
+    release: bool,
+
     /// Emit Cranelift IR (.clif) — lightweight alternative to LLVM
     #[arg(long)]
     emit_clif: bool,
+
+    /// Output artifact path. Without further flags, produces a linked executable.
+    #[arg(short = 'o')]
+    output: Option<PathBuf>,
+
+    /// Keep the intermediate object file when producing an executable.
+    #[arg(long)]
+    keep_object: bool,
 
     /// JSON diagnostics for IDE
     #[arg(long)]
@@ -57,6 +69,7 @@ fn main() -> anyhow::Result<()> {
     let t0 = std::time::Instant::now();
 
     let mut all_diags: Vec<Diagnostic> = Vec::new();
+    let mut mir_all: Vec<baluac_lib::mir::MirModule> = Vec::new();
     for file in &args.files {
         let src = std::fs::read_to_string(file)?;
         let file_str = file.display().to_string();
@@ -75,16 +88,18 @@ fn main() -> anyhow::Result<()> {
         profile.record(EventKind::Parse, t.elapsed().as_millis() as u64, file_str.clone());
         all_diags.append(&mut parse_diags);
 
-        // Stage 3: Semantic
+        // Stage 3: Semantic (Phase 1 TypeTable, consumed by MIR in Phase 2)
         let t = std::time::Instant::now();
         let mut analyzer = SemanticAnalyzer::new();
-        let (mut sem_diags, _type_table) = analyzer.analyze(&program);
+        let (mut sem_diags, type_table) = analyzer.analyze(&program);
+        let type_entries = type_table.len();
         profile.record(EventKind::Semantic, t.elapsed().as_millis() as u64, file_str.clone());
         all_diags.append(&mut sem_diags);
 
-        // Stage 4: MIR
+        // Stage 4: MIR (Phase 2: wired to TypeTable)
         let t = std::time::Instant::now();
-        let mir = MirBuilder::lower(&program);
+        let mir = MirBuilder::lower_with_types(&program, &type_table);
+        mir_all.extend(mir.clone());
         profile.record(EventKind::Codegen, t.elapsed().as_millis() as u64, file_str.clone());
         if args.emit_mir {
             println!("{}", MirBuilder::to_json(&mir));
@@ -109,10 +124,11 @@ fn main() -> anyhow::Result<()> {
             println!("; Safety profile: {} — checks enabled (MISRA/AUTOSAR/DO-178C)", profile_name);
         }
         if args.verbose {
-            eprintln!("[verbose] lex {:?}ms, parse {:?}ms, semantic {:?}ms", 
+            eprintln!("[verbose] lex {:?}ms, parse {:?}ms, semantic {:?}ms, types {} entries",
                 profile.events.iter().filter(|e| matches!(e.kind, EventKind::Lex)).last().map(|e| e.duration_ms).unwrap_or(0),
                 profile.events.iter().filter(|e| matches!(e.kind, EventKind::Parse)).last().map(|e| e.duration_ms).unwrap_or(0),
-                profile.events.iter().filter(|e| matches!(e.kind, EventKind::Semantic)).last().map(|e| e.duration_ms).unwrap_or(0));
+                profile.events.iter().filter(|e| matches!(e.kind, EventKind::Semantic)).last().map(|e| e.duration_ms).unwrap_or(0),
+                type_entries);
         }
     }
     profile.total_ms = t0.elapsed().as_millis() as u64;
@@ -131,6 +147,18 @@ fn main() -> anyhow::Result<()> {
         if all_diags.iter().any(|d| matches!(d.severity, Severity::Error)) {
             std::process::exit(1);
         }
+    } else if let Some(out) = &args.output {
+        // Phase 2: produce a linked executable via the Cranelift backend.
+        // Debug default opt 0; --release selects opt 2 (speed).
+        let opt: u8 = if args.release { 2 } else { 0 };
+        let summary = baluac_lib::backend::object_emit::build_executable(
+            &mir_all,
+            out,
+            opt,
+            args.keep_object,
+        )?;
+        let _ = summary;
+        println!("balua: produced executable {}", out.display());
     } else if !args.emit_llvm && !args.emit_mir {
         let exe = std::env::current_exe().ok().and_then(|p| p.file_name().map(|n| n.to_string_lossy().into_owned())).unwrap_or("balua".into());
         println!("{}: compilation successful ({} files, target: {})", exe.trim_end_matches(".exe"), args.files.len(), args.target);
