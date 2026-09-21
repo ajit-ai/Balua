@@ -80,6 +80,36 @@ const CASES: &[Case] = &[
         src: "fn main() -> i32 { let x = 3; if x > 0 { 1 } else { 0 } }",
         expected: 1,
     },
+    Case {
+        name: "match_expr",
+        src: "fn main() -> i32 { let x = 2; let r = match x { 1 => 10, 2 => 20, _ => 0 }; r }",
+        expected: 20,
+    },
+    Case {
+        name: "match_default",
+        src: "fn main() -> i32 { let x = 9; let r = match x { 1 => 10, 2 => 20, _ => 0 }; r }",
+        expected: 0,
+    },
+    Case {
+        name: "multi_param_call",
+        src: "fn add(a: i32, b: i32) -> i32 { a + b }\nfn main() -> i32 { add(20, 22) }",
+        expected: 42,
+    },
+    Case {
+        name: "nested_loop",
+        src: "fn main() -> i32 { let mut s = 0; for i in 0..3 { let mut j = 0; while j < 2 { s = s + 1; j = j + 1; } } s }",
+        expected: 6,
+    },
+    Case {
+        name: "early_return",
+        src: "fn foo() -> i32 { return 5; 6 }\nfn main() -> i32 { foo() }",
+        expected: 5,
+    },
+    Case {
+        name: "bitwise",
+        src: "fn main() -> i32 { let a = 5; let b = 3; let c = a & b; let d = a | b; let e = a ^ b; c + d + e }",
+        expected: 14,
+    },
 ];
 
 /// Compile + link + run a Balua source, returning its exit code.

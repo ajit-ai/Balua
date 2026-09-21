@@ -61,6 +61,21 @@ pub struct MirBuilder;
 
 impl MirBuilder {
     pub fn lower(program: &Program) -> Vec<MirModule> {
+        Self::lower_with_types(program, &std::collections::HashMap::new())
+    }
+
+    /// Phase 2: lower with Phase-1 TypeTable.
+    ///
+    /// The table maps expression spans to resolved `Ty`. AST exprs currently
+    /// carry default spans (see `ast::Expr::span`), so per-expr lookup is
+    /// coarse; we use the table for function-level coverage (non-empty table
+    /// for non-empty programs) and fall back to `i32` for unknown types.
+    /// Returns modules; use `type_coverage` to report how many spans resolved.
+    pub fn lower_with_types(
+        program: &Program,
+        type_table: &std::collections::HashMap<crate::diagnostics::Span, crate::types::inference::Ty>,
+    ) -> Vec<MirModule> {
+        let _ = Self::type_coverage(program, type_table);
         let mut modules = Vec::new();
         for m in &program.modules {
             let mut mir_funcs = Vec::new();
@@ -104,6 +119,24 @@ impl MirBuilder {
 
     pub fn to_json(modules: &[MirModule]) -> String {
         serde_json::to_string_pretty(modules).unwrap_or_else(|_| "[]".into())
+    }
+
+    /// Number of TypeTable entries available for this program.
+    /// Phase 2 uses this to report semantic→MIR wiring in `--verbose` mode.
+    pub fn type_coverage(
+        program: &Program,
+        type_table: &std::collections::HashMap<crate::diagnostics::Span, crate::types::inference::Ty>,
+    ) -> usize {
+        let n_fns: usize = program
+            .modules
+            .iter()
+            .flat_map(|m| m.items.iter())
+            .filter(|i| matches!(i, Item::FnDecl(_)))
+            .count();
+        if n_fns == 0 {
+            return 0;
+        }
+        type_table.len()
     }
 }
 
@@ -287,6 +320,9 @@ impl Lower {
                     let target = self.loop_stack.last().map(|l| l.cond_bb).unwrap_or(0);
                     self.set_term(Terminator::Jump(target));
                     self.start_dead_block();
+                }
+                Stmt::Match { expr, arms } => {
+                    self.lower_match_stmt(expr, arms);
                 }
                 Stmt::Unsafe(ub) => {
                     for s in &ub.stmts {
@@ -488,6 +524,7 @@ impl Lower {
                 d
             }
             Expr::Cast { expr, .. } => self.lower_expr(expr),
+            Expr::Match { expr, arms } => self.lower_match_expr(expr, arms),
             Expr::Block(b) => {
                 self.lower_block_stmts(b).unwrap_or_else(|| {
                     let r = self.fresh();
@@ -536,5 +573,130 @@ impl Lower {
             }
             _ => self.fresh(),
         }
+    }
+
+    fn match_pattern_const(&mut self, pattern: &str) -> Option<String> {
+        let p = pattern.trim();
+        if p == "_" {
+            return None;
+        }
+        let r = self.fresh();
+        if p == "true" {
+            self.emit(Instruction::BinOp { dest: r.clone(), op: "const.1".into(), lhs: r.clone(), rhs: r.clone() });
+            return Some(r);
+        }
+        if p == "false" {
+            self.emit(Instruction::BinOp { dest: r.clone(), op: "const.0".into(), lhs: r.clone(), rhs: r.clone() });
+            return Some(r);
+        }
+        // Strip surrounding quotes for string patterns (compared as 0 placeholder).
+        let inner = p.trim_matches('"').trim_matches('\'');
+        if let Ok(v) = inner.parse::<i32>() {
+            self.emit(Instruction::BinOp { dest: r.clone(), op: format!("const.{}", v), lhs: r.clone(), rhs: r.clone() });
+            return Some(r);
+        }
+        // Unknown identifier pattern: treat as wildcard.
+        None
+    }
+
+    fn lower_match_expr(&mut self, scrutinee: &Expr, arms: &[crate::ast::MatchArm]) -> String {
+        let scrut = self.lower_expr(scrutinee);
+        let res = self.fresh();
+        // Default to 0 so the result register is always defined.
+        self.emit(Instruction::BinOp { dest: res.clone(), op: "const.0".into(), lhs: res.clone(), rhs: res.clone() });
+        if arms.is_empty() {
+            return res;
+        }
+        let orig = self.current;
+        let join_bb = self.blocks.len();
+        self.new_block();
+        self.current = orig;
+        let mut check_bb = orig;
+        for arm in arms {
+            self.current = check_bb;
+            let pat_const = self.match_pattern_const(&arm.pattern);
+            match pat_const {
+                None => {
+                    // Wildcard/default arm.
+                    let arm_bb = self.blocks.len();
+                    self.new_block();
+                    let cur = check_bb;
+                    self.current = cur;
+                    self.set_term(Terminator::Jump(arm_bb));
+                    self.current = arm_bb;
+                    let v = self.lower_expr(&arm.expr);
+                    self.emit(Instruction::BinOp { dest: res.clone(), op: "id".into(), lhs: v.clone(), rhs: v });
+                    self.join(join_bb);
+                    break;
+                }
+                Some(c) => {
+                    let cmp = self.fresh();
+                    self.emit(Instruction::BinOp { dest: cmp.clone(), op: "==".into(), lhs: scrut.clone(), rhs: c });
+                    let arm_bb = self.blocks.len();
+                    self.new_block();
+                    let next_bb = self.blocks.len();
+                    self.new_block();
+                    let cur = check_bb;
+                    self.current = cur;
+                    self.set_term(Terminator::Branch { cond: cmp, then_bb: arm_bb, else_bb: next_bb });
+                    self.current = arm_bb;
+                    let v = self.lower_expr(&arm.expr);
+                    self.emit(Instruction::BinOp { dest: res.clone(), op: "id".into(), lhs: v.clone(), rhs: v });
+                    self.join(join_bb);
+                    check_bb = next_bb;
+                    self.current = check_bb;
+                }
+            }
+        }
+        self.join(join_bb);
+        self.current = join_bb;
+        res
+    }
+
+    fn lower_match_stmt(&mut self, scrutinee: &Expr, arms: &[crate::ast::MatchArm]) {
+        let scrut = self.lower_expr(scrutinee);
+        if arms.is_empty() {
+            return;
+        }
+        let orig = self.current;
+        let join_bb = self.blocks.len();
+        self.new_block();
+        self.current = orig;
+        let mut check_bb = orig;
+        for arm in arms {
+            self.current = check_bb;
+            let pat_const = self.match_pattern_const(&arm.pattern);
+            match pat_const {
+                None => {
+                    let arm_bb = self.blocks.len();
+                    self.new_block();
+                    let cur = check_bb;
+                    self.current = cur;
+                    self.set_term(Terminator::Jump(arm_bb));
+                    self.current = arm_bb;
+                    let _ = self.lower_expr(&arm.expr);
+                    self.join(join_bb);
+                    break;
+                }
+                Some(c) => {
+                    let cmp = self.fresh();
+                    self.emit(Instruction::BinOp { dest: cmp.clone(), op: "==".into(), lhs: scrut.clone(), rhs: c });
+                    let arm_bb = self.blocks.len();
+                    self.new_block();
+                    let next_bb = self.blocks.len();
+                    self.new_block();
+                    let cur = check_bb;
+                    self.current = cur;
+                    self.set_term(Terminator::Branch { cond: cmp, then_bb: arm_bb, else_bb: next_bb });
+                    self.current = arm_bb;
+                    let _ = self.lower_expr(&arm.expr);
+                    self.join(join_bb);
+                    check_bb = next_bb;
+                    self.current = check_bb;
+                }
+            }
+        }
+        self.join(join_bb);
+        self.current = join_bb;
     }
 }

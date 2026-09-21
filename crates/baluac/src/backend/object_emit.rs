@@ -17,6 +17,8 @@ pub fn compile_to_object(modules: &[MirModule], out_obj: &Path, opt_level: u8) -
 }
 
 /// Find a usable C compiler for linking.
+/// For cc/gcc/clang we require `--version` to succeed; MSVC `cl` is accepted
+/// on successful spawn since it returns non-zero without args.
 fn find_linker() -> Option<(&'static str, &'static str)> {
     for (name, arg) in [
         ("cc", "--version"),
@@ -24,8 +26,10 @@ fn find_linker() -> Option<(&'static str, &'static str)> {
         ("clang", "--version"),
         ("cl", ""),
     ] {
-        if Command::new(name).arg(arg).output().is_ok() {
-            return Some((name, arg));
+        match Command::new(name).arg(arg).output() {
+            Ok(_) if name == "cl" => return Some((name, arg)),
+            Ok(out) if out.status.success() => return Some((name, arg)),
+            _ => continue,
         }
     }
     None

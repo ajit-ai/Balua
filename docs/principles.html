@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balua Principles</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;max-width:960px;margin:2em auto;padding:0 1em;line-height:1.6;color:#1a1a1a}
+nav{background:#0b2a4a;color:#fff;padding:.7em 1em;border-radius:8px}
+nav a{color:#9fd0ff;margin-right:1em;text-decoration:none}
+code{background:#f2f4f8;padding:.1em .35em;border-radius:4px}
+h1,h2{color:#0b2a4a}
+</style>
+</head>
+<body>
+<nav><strong>Balua Docs</strong> &nbsp; <a href="index.html">Index</a><a href="language.html">Language</a><a href="features.html">Features</a><a href="principles.html">Principles</a><a href="roadmap.html">Roadmap</a></nav>
+<h1>Balua Principles</h1>
+<p>Source: <code>spec/BLRS-v1.0.md:10</code>, <code>README.md:7</code>. Motto: <strong>One Language. Every Silicon.</strong></p>
+<h2>1. Zero-cost abstractions</h2><p>High-level <code>Tensor stream spawn/chan</code> compile to optimal code. MIR inlining + <code>Pure</code> elision, LLVM O3+LTO/PGO/BOLT.</p>
+<h2>2. Hardware-first</h2><p>Hardware is syntax: <code>@hw::</code>, <code>kernel/circuit/tensor fn</code>, <code>qubit v512 Tensor</code>. Per-region backends + <code>baluald</code> fat binary.</p>
+<h2>3. Safety without GC</h2><p>Single owner, move, borrow, lifetimes, <code>Send/Sync</code>. <code>E_USE_AFTER_MOVE E_BORROW_CONFLICT E_TYPE_MISMATCH</code>. No GC, <code>no_std</code> ready.</p>
+<h2>4. Unified toolchain</h2><p>One <code>balua</code> driver + <code>blpkg</code> + fmt/lsp/dbg/prof/doc/test/bindgen. JSON diagnostics, events, profile JSON.</p>
+<h2>5. Determinism</h2><p>Reproducible builds, fuzzed frontend, <code>#[requires]/[ensures]</code> → Frama-C/CBMC, WCET/stack proofs.</p>
+<h2>6. Interoperability</h2><p>C ABI stable, <code>extern</code> for C/C++/Rust/CUDA/OpenCL, Python, VHDL/Verilog, WASM, <code>.blh</code> bindgen.</p>
+<h2>7. Certifiability</h2><p><code>--safety-profile</code> AUTOSAR/DO-178C/IEC61508, MISRA, <code>#[max_stack]/[wcet_cycles]/[interrupt_handler]</code>, SBOM + provenance.</p>
+<h2>8. Simulation-first portability</h2><p>HAL sim fallbacks (<code>#[test(sim=true)]</code>), cross-arch/back-end/OS.</p>
+<h2>9. Self-hostability</h2><p>Rust now, Balua within 3 majors. <code>selfhost/lexer.bl parser.bl</code> done; ast/mir/semantic next. Parallel/incremental builds.</p>
+<h2>10. Open governance</h2><p>MIT/Apache-2.0, Design Authority, <code>GIT_WORKFLOW.md:3</code> (<code>main←develop←phase/*</code>), per-phase tags.</p>
+</body>
+</html>
