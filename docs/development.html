@@ -25,6 +25,6 @@ cargo test -p baluac --test lexer_tests --test parser_tests --test semantic_test
 cargo test -p baluac --test execution
 cargo test -p blpkg</pre>
 <h2>Local docs</h2>
-<p>Open <code>docs/index.html</code> (<code>file://</code> works). Sphinx build (output git-ignored): <code>pip install -r docs/requirements.txt &amp;&amp; sphinx-build -b html -W docs docs/_build/html</code>. No Pages deployment — local-only.</p>
+<p>Open <code>docs/index.html</code> (<code>file://</code> works). Sphinx build (output git-ignored): <code>pip install -r docs/requirements.txt &amp;&amp; sphinx-build -b html -W docs docs/_build/html</code>. The <code>Pages</code> workflow deploys to GitHub Pages on <code>main</code> pushes (enable under Settings → Pages → Source: GitHub Actions).</p>
 </body>
 </html>

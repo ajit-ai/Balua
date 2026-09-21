@@ -42,5 +42,7 @@ no server needed). Sphinx build (not committed)::
   pip install -r docs/requirements.txt
   sphinx-build -b html -W docs docs/_build/html
 
-Build output (``docs/_build/``) is git-ignored. There is no GitHub Pages
-deployment; documentation is local-only by project decision.
+Build output (``docs/_build/``) is git-ignored. The ``Pages`` workflow
+(``.github/workflows/pages.yml``) rebuilds with ``-W`` and deploys to
+GitHub Pages on every ``main`` push touching ``docs/**`` (enable once
+under repo Settings → Pages → Source: GitHub Actions).
