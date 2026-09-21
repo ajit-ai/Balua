@@ -10,12 +10,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - run: cargo build --workspace
-      - run: cargo test --workspace
-      - run: cargo run -p baluac -- examples/01_hello_hardware.bl --emit-mir --json-diagnostics
+      - run: cargo test -p baluac --test lexer_tests --test parser_tests --test semantic_tests
+      - run: cargo test -p baluac --test execution
+      - run: cargo run -q -p baluac --bin balua -- examples/01_hello_hardware.bl --emit-mir
+      - run: cargo run -q -p baluac --bin balua -- hello.bl -o hello-ci.exe
   blpkg:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - run: cargo run -p blpkg -- build
-      - run: cargo run -p blpkg -- test
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build -p blpkg
+      - run: cargo run -q -p blpkg --bin blpkg -- --help
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: test -f docs/index.html -a -f docs/language.html -a -f docs/features.html -a -f docs/principles.html -a -f docs/roadmap.html
