@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balua — Phase-wise Milestones and Detailed Design Architecture</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;line-height:1.6;color:#1a1a1a}
+nav{background:#0b2a4a;color:#fff;padding:.7em 1em;border-radius:8px}
+nav a{color:#9fd0ff;margin-right:1em;text-decoration:none}
+code{background:#f2f4f8;padding:.1em .35em;border-radius:4px}
+pre{background:#0f172a;color:#e2e8f0;padding:1em;border-radius:8px;overflow:auto}
+h1,h2{color:#0b2a4a} h2{border-bottom:2px solid #dbe4f0;padding-bottom:.2em}
+table{border-collapse:collapse;width:100%;margin:1em 0}
+th,td{border:1px solid #cbd5e1;padding:.5em;text-align:left}
+th{background:#e6eef8}
+</style>
+</head>
+<body>
+<nav><strong>Balua Docs</strong> &nbsp; <a href="index.html">Index</a><a href="language.html">Language</a><a href="features.html">Features</a><a href="principles.html">Principles</a><a href="roadmap.html">Roadmap</a><a href="roadmap-detail.html">Detail</a></nav>
+<h1>Balua — Phase-wise Milestones and Detailed Design Architecture</h1>
+<p>Local-only plan. Companion to <code>roadmap.rst</code> (ledger) and <code>language.rst</code> (guide). No phase is done until a <strong>runnable artifact</strong> executes (<code>spec/NFR-roadmap-v2.md:25</code>).</p>
+<h2>Position (develop@1bc438d)</h2>
+<p>Real: lexer/parser/AST, semantic + <code>TypeTable</code> (<code>semantic.rs:76</code>), MIR (<code>mir.rs:62</code>), Cranelift <code>i32</code> exes (<code>cranelift.rs:51</code>, <code>object_emit.rs:63</code>) — 14 tests green. Stubs: LLVM/PTX/SPIR-V/HLS/QASM text, <code>baluald</code> (<code>baluald.rs:22</code>), <code>blpkg</code> ops (<code>builder.rs:17</code>), <code>safety/*</code> flags, <code>std/hal/ffi</code> text, <code>tools/*</code> READMEs, no runtime.</p>
+<h2>Architecture blueprint</h2>
+<pre>.bl → Lexer → Parser → AST → Semantic(+TypeTable) → MIR → Backend(s) → Link → exe</pre>
+<ol>
+<li><strong>Spans:</strong> <code>Expr::span()</code> (<code>ast.rs:277</code>) defaults collapse <code>TypeTable</code> keys — real per-expr spans before type-directed codegen.</li>
+<li><strong>MIR schema:</strong> version <code>MirModule/Function/Block/Instruction/Terminator</code>; <code>Phi</code> emitted, never consumed (<code>cranelift.rs:242</code>).</li>
+<li><strong>Backend trait:</strong> <code>lower -&gt; String</code> (<code>mod.rs:16</code>) lets stubs pass with comments — move to typed artifacts.</li>
+<li><strong>One linker:</strong> <code>object_emit::build_executable</code> (real) vs <code>BaluaLinker::link</code> (prints, dead) — delete one.</li>
+<li><strong>Modules:</strong> <code>UseDecl</code> ignored (<code>semantic.rs:97</code>); <code>std/</code> never read — decide sysroot vs single-file.</li>
+<li><strong>Runtime:</strong> stay <code>i32</code>-only (document) or add string/array/IO layout.</li>
+<li><strong>Safety as MIR passes</strong>, not manual bools (<code>misra.rs:12</code>, <code>wcet.rs:17</code>).</li>
+<li><strong>Manifest:</strong> <code>Balua.toml:1</code> additive-only versioning.</li>
+</ol>
+<h2>M1 — blpkg local (NEXT, 3–4w)</h2>
+<p><code>new/build/run/test</code> real. <code>Balua.toml</code> schema; local semver; <code>builder</code> calls <code>baluac</code> lib + <code>object_emit</code>; <code>run/test</code> execute; <code>bom</code> CycloneDX JSON. Exit: demo builds+runs+tests, <code>cargo test -p blpkg</code> green → <code>phase-3-local</code>.</p>
+<pre>cargo build -p blpkg
+cargo test -p blpkg
+blpkg new demo &amp;&amp; blpkg build &amp;&amp; blpkg run &amp;&amp; blpkg test</pre>
+<h2>M2 — Safety-min (3w)</h2>
+<p>MIR walkers (heap/recursion/unbounded-loop, <code>#[max_stack]</code>), <code>E_SAFETY_*</code> JSON, gate before <code>-o</code>. Exit → <code>phase-5-min</code>.</p>
+<h2>M3 — DX-min + stabilization (3–4w)</h2>
+<p>Real <code>fmt/test</code>, frozen <code>--help</code>/JSON, fuzz 1h, repro <code>-o</code>, spec+docs update. Exit → <code>v1.0-ga-rc</code>.</p>
+<h2>M4 — GA (1–2w)</h2>
+<p><code>develop→main --no-ff</code>, notes, <code>--version v1.0-ga</code>, fresh-VM demo. Then <strong>stop</strong>.</p>
+<h2>Post-GA backlog</h2>
+<p><strong>E1</strong> LLVM-real · <strong>E2</strong> parallelism runtime · <strong>E3</strong> GPU/NPU · <strong>E4</strong> FPGA/quantum · <strong>E5</strong> self-host · <strong>E6</strong> ecosystem · <strong>E7</strong> certification. Each: own <code>phase/*</code> + executable exit + tag.</p>
+<h2>Gate table</h2>
+<table><tr><th>Gate</th><th>Depends</th><th>Proves</th><th>Tag</th></tr>
+<tr><td>M1</td><td>M0</td><td>package builds real exe</td><td>phase-3-local</td></tr>
+<tr><td>M2</td><td>M1</td><td>unsafe rejected</td><td>phase-5-min</td></tr>
+<tr><td>M3</td><td>M2</td><td>DX + repro</td><td>v1.0-ga-rc</td></tr>
+<tr><td>M4</td><td>M3</td><td>fresh-VM install</td><td>v1.0-ga</td></tr>
+<tr><td>E*</td><td>M4</td><td>one HW/runtime axis each</td><td>phase-N each</td></tr></table>
+</body>
+</html>
