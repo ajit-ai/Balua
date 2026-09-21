@@ -52,10 +52,29 @@ fn main() -> Result<()> {
             println!("blpkg build — profile={} target={:?}", profile, target);
             builder::build(target.as_deref(), release)?;
         }
-        Cmd::Run => { builder::build(None, false)?; println!("Running target/debug/app ..."); }
-        Cmd::Test => println!("blpkg test — running #[test] and #[test(sim=true)] suites (simulation fallback, no hardware needed)"),
-        Cmd::Bench => println!("blpkg bench — criterion-style reporting"),
-        Cmd::Add { pkg } => println!("Adding dependency '{}' via PubGrub resolver...", pkg),
+        Cmd::Run => {
+            let exe = builder::build(None, false)?;
+            let code = builder::run_exe(&exe)?;
+            println!("Ran {} — exit {}", exe.display(), code);
+        }
+        Cmd::Test => {
+            let exe = builder::build(None, false)?;
+            let code = builder::run_exe(&exe)?;
+            println!("test(sim): entry {} — exit {} (simulation fallback, no hardware needed)", exe.display(), code);
+        }
+        Cmd::Bench => println!("blpkg bench — criterion-style reporting (post-GA)"),
+        Cmd::Add { pkg } => {
+            let (name, req) = match pkg.split_once('@') {
+                Some((n, r)) => (n.to_string(), r.to_string()),
+                None => (pkg.clone(), "*".to_string()),
+            };
+            let mut resolver = resolver::Resolver::new();
+            resolver.add(&name, &req);
+            match resolver.resolve() {
+                Ok(map) => println!("Resolved '{}' -> '{}' (local-only, no registry fetch)", name, map.get(&name).unwrap()),
+                Err(e) => anyhow::bail!("cannot add '{}': {}", pkg, e),
+            }
+        }
         Cmd::Publish => registry::publish()?,
         Cmd::Doc => println!("Generating docs via balua-doc ..."),
         Cmd::Fmt => println!("Formatting via balua-fmt ..."),

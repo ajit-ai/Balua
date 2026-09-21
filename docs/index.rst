@@ -21,6 +21,7 @@ Contents
    features
    principles
    roadmap
+   roadmap-detail
 
 Project snapshot (2026-09-21)
 -----------------------------
@@ -55,5 +56,6 @@ Files in this folder
 - ``features.rst`` / ``features.html`` — complete feature catalogue
 - ``principles.rst`` / ``principles.html`` — design principles
 - ``roadmap.rst`` / ``roadmap.html`` — roadmap only (phases, no GA planning)
+- ``roadmap-detail.rst`` / ``roadmap-detail.html`` — phase-wise milestones + detailed design architecture (local-only)
 
 License: MIT OR Apache-2.0. See ``LICENSE``.

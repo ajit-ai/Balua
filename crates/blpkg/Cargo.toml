@@ -22,3 +22,4 @@ log.workspace = true
 env_logger.workspace = true
 toml = "0.8"
 semver = "1.0"
+baluac = { path = "../baluac" }
