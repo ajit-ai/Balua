@@ -1,6 +1,6 @@
-# 03_gpu_matrix_multiply � CUDA tensor-core GEMM vs cuBLAS. Target: lpkg build --target gpu:cuda:sm90 (PTX).
+﻿# 03_gpu_matrix_multiply — CUDA tensor-core GEMM vs cuBLAS. Target: blpkg build --target gpu:cuda:sm90 (PTX).
 
-CUDA tensor-core GEMM vs cuBLAS. Target: lpkg build --target gpu:cuda:sm90 (PTX).
+CUDA tensor-core GEMM vs cuBLAS. Target: blpkg build --target gpu:cuda:sm90 (PTX).
 
 Build:
 ``powershell

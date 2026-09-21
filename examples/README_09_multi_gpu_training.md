@@ -1,4 +1,4 @@
-# 09_multi_gpu_training — Distributed SGD 8 GPUs via NCCL.
+# 09_multi_gpu_training â€” Distributed SGD 8 GPUs via NCCL.
 
 Distributed SGD 8 GPUs via NCCL.
 

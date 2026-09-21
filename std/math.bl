@@ -1,2 +1,2 @@
-// std::math — sin, cos, sqrt, fma, SIMD math
+// std::math â€” sin, cos, sqrt, fma, SIMD math
 module std::math { pub fn sin(x: f64) -> f64 { x } pub fn sqrt(x: f64) -> f64 { x } }

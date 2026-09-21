@@ -1,4 +1,4 @@
-# 02_cpu_simd_sort — AVX-512 radix sort on 100M ints, vs std::sort. Target: x86_64+aarch64, aluac --target x86_64.
+# 02_cpu_simd_sort â€” AVX-512 radix sort on 100M ints, vs std::sort. Target: x86_64+aarch64, aluac --target x86_64.
 
 AVX-512 radix sort on 100M ints, vs std::sort. Target: x86_64+aarch64, aluac --target x86_64.
 

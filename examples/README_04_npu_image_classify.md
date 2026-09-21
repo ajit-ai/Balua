@@ -1,6 +1,6 @@
-# 04_npu_image_classify � MobileNetV3 ONNX top-5. Target: lpkg build --target npu:onnx.
+﻿# 04_npu_image_classify — MobileNetV3 ONNX top-5. Target: blpkg build --target npu:onnx.
 
-MobileNetV3 ONNX top-5. Target: lpkg build --target npu:onnx.
+MobileNetV3 ONNX top-5. Target: blpkg build --target npu:onnx.
 
 Build:
 ``powershell

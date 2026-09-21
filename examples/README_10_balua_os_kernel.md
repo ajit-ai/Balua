@@ -1,4 +1,4 @@
-# 10_balua_os_kernel — Minimal kernel: page allocator, scheduler, syscall table, no_std.
+# 10_balua_os_kernel â€” Minimal kernel: page allocator, scheduler, syscall table, no_std.
 
 Minimal kernel: page allocator, scheduler, syscall table, no_std.
 

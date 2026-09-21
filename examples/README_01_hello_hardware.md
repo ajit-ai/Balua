@@ -1,6 +1,6 @@
-# 01_hello_hardware � Detect all silicon, simulation fallback, lpkg run works on any host. Target: CPU only.
+﻿# 01_hello_hardware — Detect all silicon, simulation fallback, blpkg run works on any host. Target: CPU only.
 
-Detect all silicon, simulation fallback, lpkg run works on any host. Target: CPU only.
+Detect all silicon, simulation fallback, blpkg run works on any host. Target: CPU only.
 
 Build:
 ``powershell

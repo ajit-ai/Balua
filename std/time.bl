@@ -1,2 +1,2 @@
-// std::time — Instant, Duration, SystemTime
+// std::time â€” Instant, Duration, SystemTime
 module std::time { pub struct Instant; pub struct Duration; }

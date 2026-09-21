@@ -1,2 +1,2 @@
-// std::log — log::info!, log::error! (no_std compatible)
+// std::log â€” log::info!, log::error! (no_std compatible)
 module std::log { pub macro info!(...) {} pub macro error!(...) {} }

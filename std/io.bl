@@ -1,2 +1,2 @@
-// std::io — Read, Write, BufReader, File, Stdin, Stdout
+// std::io â€” Read, Write, BufReader, File, Stdin, Stdout
 module std::io { pub trait Read {} pub trait Write {} pub struct File; }
