@@ -57,6 +57,10 @@ struct Args {
     #[arg(long)]
     safety_profile: Option<String>,
 
+    /// Optional worst-case stack limit in bytes enforced with --safety-profile
+    #[arg(long)]
+    safety_stack_limit: Option<usize>,
+
     /// Verbose output with compilation events
     #[arg(long)]
     verbose: bool,
@@ -120,15 +124,37 @@ fn main() -> anyhow::Result<()> {
             }
         }
 
-        if let Some(profile_name) = &args.safety_profile {
-            println!("; Safety profile: {} — checks enabled (MISRA/AUTOSAR/DO-178C)", profile_name);
-        }
         if args.verbose {
             eprintln!("[verbose] lex {:?}ms, parse {:?}ms, semantic {:?}ms, types {} entries",
                 profile.events.iter().filter(|e| matches!(e.kind, EventKind::Lex)).last().map(|e| e.duration_ms).unwrap_or(0),
                 profile.events.iter().filter(|e| matches!(e.kind, EventKind::Parse)).last().map(|e| e.duration_ms).unwrap_or(0),
                 profile.events.iter().filter(|e| matches!(e.kind, EventKind::Semantic)).last().map(|e| e.duration_ms).unwrap_or(0),
                 type_entries);
+        }
+    }
+    // Stage 5 (M2): safety enforcement over all lowered MIR. Violations join
+    // diagnostics so they print below and block executable output (fail-closed).
+    if args.safety_stack_limit.is_some() && args.safety_profile.is_none() {
+        eprintln!("warning: --safety-stack-limit has no effect without --safety-profile");
+    }
+    if let Some(profile_name) = &args.safety_profile {
+        match baluac_lib::safety::parse_profile(profile_name) {
+            Some(profile) => {
+                let report = baluac_lib::safety::check_modules(&mir_all, &profile, args.safety_stack_limit);
+                if args.verbose {
+                    eprintln!("{}", report.stack_report);
+                }
+                if report.errors.is_empty() {
+                    eprintln!(
+                        "safety profile {}: {} functions checked ({} hardware-targeted skipped), 0 violations",
+                        profile_name,
+                        report.checked_functions,
+                        report.skipped_hw.len()
+                    );
+                }
+                all_diags.extend(report.errors);
+            }
+            None => all_diags.push(baluac_lib::safety::unknown_profile_error(profile_name)),
         }
     }
     profile.total_ms = t0.elapsed().as_millis() as u64;

@@ -18,15 +18,20 @@ impl StackAnalyzer {
     }
 
     pub fn verify(&self) -> Vec<String> {
-        let mut errs = Vec::new();
+        self.overflows().iter().map(|(func, usage, limit)| format!("Stack overflow: '{}' uses {} bytes but limit is {} bytes", func, usage, limit)).collect()
+    }
+
+    /// Structured overflows `(func, usage_bytes, limit)` for diagnostics with spans.
+    pub fn overflows(&self) -> Vec<(String, usize, usize)> {
+        let mut out = Vec::new();
         for (func, info) in &self.infos {
             if let Some(limit) = info.limit {
                 if info.usage_bytes > limit {
-                    errs.push(format!("Stack overflow: '{}' uses {} bytes but limit is {} bytes", func, info.usage_bytes, limit));
+                    out.push((func.clone(), info.usage_bytes, limit));
                 }
             }
         }
-        errs
+        out
     }
 
     pub fn report(&self) -> String {

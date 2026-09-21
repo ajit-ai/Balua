@@ -72,6 +72,19 @@ impl Parser {
                 continue;
             }
             if self.check("}") { self.advance(); continue; }
+            // Top-level `module name { items }` — parsed into its own Module
+            // instead of being swallowed as a `use` path (which silently
+            // dropped every item up to the next `;` or EOF).
+            if self.check("module") {
+                match self.parse_module_block() {
+                    Ok(m) => modules.push(m),
+                    Err(d) => {
+                        self.diags.push(d);
+                        self.synchronize();
+                    }
+                }
+                continue;
+            }
             match self.parse_item() {
                 Ok(item) => items.push(item),
                 Err(d) => {
@@ -115,9 +128,10 @@ impl Parser {
             None
         };
 
-        // annotations like #[...] — skip for now but preserve
+        // annotations like #[max_stack(512)] — collected for FnDecl.attrs
+        let mut attrs = Vec::new();
         while self.peek().kind == TokenKind::Annotation {
-            self.advance();
+            attrs.push(self.advance().lexeme);
         }
 
         let tok = self.peek().clone();
@@ -125,11 +139,12 @@ impl Parser {
             "pub" | "priv" => {
                 let vis = if self.check("pub") { self.advance(); Visibility::Pub } else { self.advance(); Visibility::Priv };
                 if self.check("const") { let mut c = self.parse_const_decl()?; c.visibility = vis; return Ok(Item::ConstDecl(c)); }
-                if self.check("fn") { let mut decl = self.parse_fn_decl()?; decl.visibility = vis; if let Some(h) = hw { decl.hardware = Some(h); } return Ok(Item::FnDecl(decl)); }
+                if self.check("fn") { let mut decl = self.parse_fn_decl()?; decl.visibility = vis; decl.attrs = attrs; if let Some(h) = hw { decl.hardware = Some(h); } return Ok(Item::FnDecl(decl)); }
                 return Err(Diagnostic::error(format!("Expected fn or const after visibility but found '{}'", self.peek().lexeme)).with_span(self.peek().span.clone()));
             }
             "fn" | "async" => {
                 let mut decl = self.parse_fn_decl()?;
+                decl.attrs = attrs;
                 if let Some(h) = hw {
                     decl.hardware = Some(h);
                 }
@@ -204,7 +219,10 @@ impl Parser {
             "enum" => Ok(Item::EnumDecl(self.parse_enum()?)),
             "trait" => Ok(Item::TraitDecl(self.parse_trait()?)),
             "impl" => Ok(Item::ImplDecl(self.parse_impl()?)),
-            "use" | "module" => Ok(Item::UseDecl(self.parse_use()?)),
+            "use" => Ok(Item::UseDecl(self.parse_use()?)),
+            // `module` blocks only exist at top level (handled in parse_program);
+            // a nested one is a loud error, never a silent swallow.
+            "module" => Err(Diagnostic::error("nested `module` blocks are not supported — declare modules only at top level").with_span(self.peek().span.clone())),
             "extern" => Ok(Item::FFIDecl(self.parse_ffi()?)),
             "unsafe" => Ok(Item::UnsafeBlock(self.parse_unsafe()?)),
             _ => {
@@ -334,7 +352,7 @@ impl Parser {
         } else { None };
 
         let body = if self.check("{") { Some(self.parse_block()?) } else if self.check(";") { self.advance(); None } else { None };
-        Ok(FnDecl { name, generics, where_clause, params, ret_ty, hardware, is_async, is_extern, visibility: Visibility::Default, safety, body, span: start })
+        Ok(FnDecl { name, generics, where_clause, params, ret_ty, hardware, is_async, is_extern, visibility: Visibility::Default, safety, body, attrs: vec![], span: start })
     }
 
     fn parse_type(&mut self) -> Result<TypeExpr, Diagnostic> {
@@ -641,6 +659,29 @@ impl Parser {
         while !self.check("}") { methods.push(self.parse_fn_decl()?); }
         self.expect("}")?;
         Ok(ImplDecl { trait_name, target, methods, span })
+    }
+
+    fn parse_module_block(&mut self) -> Result<Module, Diagnostic> {
+        let span = self.peek().span.clone();
+        self.expect("module")?;
+        let name = self.advance().lexeme;
+        self.expect("{")?;
+        let mut items = Vec::new();
+        while !self.check("}") && !self.at_eof() {
+            if self.peek().kind == TokenKind::Comment {
+                self.advance();
+                continue;
+            }
+            match self.parse_item() {
+                Ok(item) => items.push(item),
+                Err(d) => {
+                    self.diags.push(d);
+                    self.synchronize();
+                }
+            }
+        }
+        self.expect("}")?;
+        Ok(Module { name, items, span })
     }
 
     fn parse_use(&mut self) -> Result<UseDecl, Diagnostic> {

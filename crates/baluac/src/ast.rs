@@ -55,6 +55,8 @@ pub struct FnDecl {
     pub visibility: Visibility,
     pub safety: SafetyTier,
     pub body: Option<Block>,
+    /// Leading `#[...]` annotations (e.g. `#[max_stack(512)]`), raw lexemes.
+    pub attrs: Vec<String>,
     pub span: Span,
 }
 

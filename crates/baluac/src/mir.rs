@@ -18,6 +18,8 @@ pub struct MirFunction {
     pub hardware: Option<HardwareTarget>,
     pub params: Vec<(String, String)>,
     pub basic_blocks: Vec<BasicBlock>,
+    /// Raw `#[...]` annotations from the source fn (e.g. `#[max_stack(512)]`).
+    pub attrs: Vec<String>,
     pub span: Span,
 }
 
@@ -88,6 +90,7 @@ impl MirBuilder {
                             hardware: f.hardware.as_ref().map(|h| h.target.clone()),
                             params,
                             basic_blocks: Lower::lower_fn(f.name.as_str(), &f.params.iter().map(|p| p.name.clone()).collect::<Vec<_>>(), &f.body),
+                            attrs: f.attrs.clone(),
                             span: f.span.clone(),
                         });
                     }
@@ -97,6 +100,7 @@ impl MirBuilder {
                             hardware: Some(HardwareTarget::Gpu),
                             params: k.params.iter().map(|p| (p.name.clone(), ty_name(&p.ty))).collect(),
                             basic_blocks: Lower::unsupported(&k.body, "@hw::gpu kernel"),
+                            attrs: vec![],
                             span: k.span.clone(),
                         });
                     }
@@ -106,6 +110,7 @@ impl MirBuilder {
                             hardware: Some(HardwareTarget::Fpga),
                             params: c.params.iter().map(|p| (p.name.clone(), ty_name(&p.ty))).collect(),
                             basic_blocks: Lower::unsupported(&c.body, "@hw::fpga circuit"),
+                            attrs: vec![],
                             span: c.span.clone(),
                         });
                     }
