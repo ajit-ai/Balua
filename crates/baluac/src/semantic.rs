@@ -122,6 +122,19 @@ impl SemanticAnalyzer {
     // ── Functions ───────────────────────────────────────────────────────
 
     fn analyze_fn(&mut self, f: &FnDecl) {
+        for attr in &f.attrs {
+            let name = attr.trim_start_matches("#[").trim_end_matches(']').split('(').next().unwrap_or("").trim();
+            if name != "max_stack" && name != "wcet_cycles" {
+                self.diagnostics.push(Diagnostic {
+                    severity: Severity::Warning,
+                    code: Some("W_UNKNOWN_ATTR".into()),
+                    message: format!("Unknown attribute '{}' on function '{}' — ignored", attr, f.name),
+                    span: Some(f.span.clone()),
+                    hint: Some("Supported: #[max_stack(N)], #[wcet_cycles(N)].".into()),
+                    hardware_context: None,
+                });
+            }
+        }
         if let Some(hw) = &f.hardware {
             if hw.target == HardwareTarget::Cpu {
                 if let Some(body) = &f.body {
@@ -468,21 +481,15 @@ impl SemanticAnalyzer {
                             }
                         }
 
-                        // Borrow/move checking for let initializers
+                        // Borrow checking for let initializers. (Calls that move,
+                        // e.g. `move_to_device(x)`, are recorded once in
+                        // analyze_expr below — recording here too produced a
+                        // spurious second E_USE_AFTER_MOVE.)
                         match init {
                             Expr::BorrowExpr { inner, is_mut, .. } => {
                                 if let Expr::Ident(name) = inner.as_ref() {
                                     let kind = if *is_mut { BorrowKind::Mut } else { BorrowKind::Shared };
                                     self.borrow_checker.borrow(name, kind);
-                                }
-                            }
-                            Expr::Call { callee, args } => {
-                                if let Expr::Ident(name) = callee.as_ref() {
-                                    if name.contains("move_to_device") {
-                                        if let Some(Expr::Ident(var)) = args.first() {
-                                            self.borrow_checker.move_to_device(var, "gpu");
-                                        }
-                                    }
                                 }
                             }
                             _ => {}

@@ -19,11 +19,16 @@ impl WcetAnalyzer {
     pub fn estimate(&mut self, func: &str, cycles: u64) { self.estimated.insert(func.to_string(), cycles); }
 
     pub fn verify(&self) -> Vec<String> {
+        self.overflows().iter().map(|(func, est, max)| format!("WCET violation: '{}' estimated {} cycles exceeds bound {} cycles", func, est, max)).collect()
+    }
+
+    /// Structured overflows `(func, estimated, bound)` for diagnostics with spans.
+    pub fn overflows(&self) -> Vec<(String, u64, u64)> {
         let mut errs = Vec::new();
         for (func, max) in &self.annotations {
             if let Some(est) = self.estimated.get(func) {
                 if est > max {
-                    errs.push(format!("WCET violation: '{}' estimated {} cycles exceeds bound {} cycles", func, est, max));
+                    errs.push((func.clone(), *est, *max));
                 }
             }
         }

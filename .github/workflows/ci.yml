@@ -12,7 +12,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --workspace
-      - run: cargo test -p baluac --test lexer_tests --test parser_tests --test semantic_tests
+      - run: cargo test -p baluac --test lexer_tests --test parser_tests --test semantic_tests --test safety_tests
+      - run: cargo test -p blpkg
       - run: cargo test -p baluac --test execution
       - run: cargo run -q -p baluac --bin balua -- examples/01_hello_hardware.bl --emit-mir
       - run: cargo run -q -p baluac --bin balua -- hello.bl -o hello-ci.exe
