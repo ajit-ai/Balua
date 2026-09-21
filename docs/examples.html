@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balua Examples</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;line-height:1.6;color:#1a1a1a}
+nav{background:#0b2a4a;color:#fff;padding:.7em 1em;border-radius:8px}
+nav a{color:#9fd0ff;margin-right:.8em;text-decoration:none;font-size:.92em}
+code{background:#f2f4f8;padding:.1em .35em;border-radius:4px}
+h1,h2{color:#0b2a4a} h2{border-bottom:2px solid #dbe4f0;padding-bottom:.2em}
+</style>
+</head>
+<body>
+<nav><strong>Balua Docs</strong> &nbsp; <a href="index.html">Index</a><a href="language.html">Language</a><a href="features.html">Features</a><a href="principles.html">Principles</a><a href="compiler.html">Compiler</a><a href="architecture.html">Arch</a><a href="heterogeneous.html">Hetero</a><a href="safety.html">Safety</a><a href="packages.html">Packages</a><a href="examples.html">Examples</a><a href="development.html">Dev</a><a href="changelog.html">Changes</a><a href="roadmap.html">Roadmap</a><a href="roadmap-detail.html">Detail</a></nav>
+<h1>Balua Examples</h1>
+<p>Measured with <code>balua &lt;file&gt; --emit-mir</code> (exit 0 = clean). READMEs describe intent, not verified behavior.</p>
+<h2>Clean</h2>
+<p><code>01_hello_hardware.bl</code>, <code>05_fpga_fir_filter.bl</code>, <code>06_quantum_grover.bl</code>. Plus repo-root <code>hello.bl</code> — the only linked+executed file (exit 1 by design).</p>
+<h2>Reporting diagnostics (18 files)</h2>
+<p><code>01a/01b/01c/01d/01e</code>, <code>02_cpu_simd_sort</code>, <code>02a</code>, <code>03_gpu</code>, <code>03a/03b</code>, <code>04_npu</code>, <code>04a</code>, <code>05a</code>, <code>06a</code>, <code>07</code>, <code>08_rtos</code>, <code>09_multi_gpu</code>, <code>10_os_kernel</code> — intended programs beyond the compilable subset (e.g. slices, <code>+=</code>, unlowered std APIs).</p>
+<h2>Suites &amp; self-host</h2>
+<p><code>tests/hal/sim_tests.bl</code>, <code>tests/comprehensive_test.bl</code> — not executed by cargo/CI. <code>selfhost/lexer.bl</code>, <code>selfhost/parser.bl</code> — pseudocode mirrors, not compiled in tests. Executable guarantees live only in <code>crates/baluac/tests/</code> (14 tests, 17 e2e cases).</p>
+</body>
+</html>

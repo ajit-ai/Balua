@@ -16,10 +16,54 @@ Contents
 
 .. toctree::
    :maxdepth: 2
+   :caption: Balua
 
    language
    features
    principles
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Compiler
+
+   compiler
+   architecture
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Heterogeneous Computing
+
+   heterogeneous
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Safety
+
+   safety
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Runtime and Packages
+
+   packages
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Examples
+
+   examples
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Development
+
+   development
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Releases
+
+   changelog
    roadmap
    roadmap-detail
 
@@ -55,6 +99,14 @@ Files in this folder
 - ``language.rst`` / ``language.html`` — Balua language guide (syntax to HAL with examples)
 - ``features.rst`` / ``features.html`` — complete feature catalogue
 - ``principles.rst`` / ``principles.html`` — design principles
+- ``compiler.rst`` — compiler pipeline, MIR, lowering, backends, CLI
+- ``architecture.rst`` — layering, contracts, module model, decisions
+- ``heterogeneous.rst`` — targets, backend status, example status
+- ``safety.rst`` — M2 safety analysis reference
+- ``packages.rst`` — runtime statement and package manager reference
+- ``examples.rst`` — example inventory with measured status
+- ``development.rst`` — workflow, CI, local verification
+- ``changelog.rst`` — releases from git history
 - ``roadmap.rst`` / ``roadmap.html`` — roadmap only (phases, no GA planning)
 - ``roadmap-detail.rst`` / ``roadmap-detail.html`` — phase-wise milestones + detailed design architecture (local-only)
 

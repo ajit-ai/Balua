@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balua Development</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;line-height:1.6;color:#1a1a1a}
+nav{background:#0b2a4a;color:#fff;padding:.7em 1em;border-radius:8px}
+nav a{color:#9fd0ff;margin-right:.8em;text-decoration:none;font-size:.92em}
+code{background:#f2f4f8;padding:.1em .35em;border-radius:4px}
+pre{background:#0f172a;color:#e2e8f0;padding:1em;border-radius:8px;overflow:auto}
+h1,h2{color:#0b2a4a} h2{border-bottom:2px solid #dbe4f0;padding-bottom:.2em}
+</style>
+</head>
+<body>
+<nav><strong>Balua Docs</strong> &nbsp; <a href="index.html">Index</a><a href="language.html">Language</a><a href="features.html">Features</a><a href="principles.html">Principles</a><a href="compiler.html">Compiler</a><a href="architecture.html">Arch</a><a href="heterogeneous.html">Hetero</a><a href="safety.html">Safety</a><a href="packages.html">Packages</a><a href="examples.html">Examples</a><a href="development.html">Dev</a><a href="changelog.html">Changes</a><a href="roadmap.html">Roadmap</a><a href="roadmap-detail.html">Detail</a></nav>
+<h1>Development and Contributing</h1>
+<p>Branches: <code>main</code> (production) ← <code>develop</code> (integration) ← <code>phase/*</code>. Never commit to <code>main</code>; merge <code>--no-ff</code>, then tag. Rules: <code>CONTRIBUTING.md</code>, <code>GIT_WORKFLOW.md</code>.</p>
+<h2>CI (<code>.github/workflows/ci.yml</code>)</h2>
+<p><code>build</code> (windows): workspace build, lexer/parser/semantic/safety suites, execution suite, <code>--emit-mir</code> and <code>-o</code> smokes. <code>blpkg</code>: build + help smoke. <code>docs</code> (ubuntu): <code>sphinx-build -b html -W</code> (warnings fail).</p>
+<h2>Local verification</h2>
+<pre>cargo build --workspace
+cargo test -p baluac --test lexer_tests --test parser_tests --test semantic_tests --test safety_tests
+cargo test -p baluac --test execution
+cargo test -p blpkg</pre>
+<h2>Local docs</h2>
+<p>Open <code>docs/index.html</code> (<code>file://</code> works). Sphinx build (output git-ignored): <code>pip install -r docs/requirements.txt &amp;&amp; sphinx-build -b html -W docs docs/_build/html</code>. No Pages deployment — local-only.</p>
+</body>
+</html>

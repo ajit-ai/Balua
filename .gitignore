@@ -11,6 +11,7 @@ Cargo.lock
 Thumbs.db
 # Balua build artifacts
 /build/
+docs/_build/
 *.o
 *.ptx
 *.spv

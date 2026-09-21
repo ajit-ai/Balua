@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balua Safety Analysis</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;line-height:1.6;color:#1a1a1a}
+nav{background:#0b2a4a;color:#fff;padding:.7em 1em;border-radius:8px}
+nav a{color:#9fd0ff;margin-right:.8em;text-decoration:none;font-size:.92em}
+code{background:#f2f4f8;padding:.1em .35em;border-radius:4px}
+pre{background:#0f172a;color:#e2e8f0;padding:1em;border-radius:8px;overflow:auto}
+h1,h2{color:#0b2a4a} h2{border-bottom:2px solid #dbe4f0;padding-bottom:.2em}
+table{border-collapse:collapse;width:100%;margin:1em 0}
+th,td{border:1px solid #cbd5e1;padding:.5em;text-align:left}
+th{background:#e6eef8}
+</style>
+</head>
+<body>
+<nav><strong>Balua Docs</strong> &nbsp; <a href="index.html">Index</a><a href="language.html">Language</a><a href="features.html">Features</a><a href="principles.html">Principles</a><a href="compiler.html">Compiler</a><a href="architecture.html">Arch</a><a href="heterogeneous.html">Hetero</a><a href="safety.html">Safety</a><a href="packages.html">Packages</a><a href="examples.html">Examples</a><a href="development.html">Dev</a><a href="changelog.html">Changes</a><a href="roadmap.html">Roadmap</a><a href="roadmap-detail.html">Detail</a></nav>
+<h1>Balua Safety Analysis</h1>
+<p>M2 reference. Implementation: <code>safety/analyze.rs:1</code>. Tests: <code>tests/safety_tests.rs:1</code> (13 tests). Safety runs on lowered MIR when <code>--safety-profile</code> is given; violations block <code>-o</code> (fail-closed).</p>
+<h2>Profiles</h2>
+<p><code>AUTOSAR_CPP14</code>, <code>DO-178C</code>, <code>IEC61508</code> (case-insensitive), <code>none</code> (no enforcement). Unknown names fail with <code>E_SAFETY_PROFILE</code>. All three real profiles enforce the same three structural rules under different labels — no certification evidence exists yet.</p>
+<h2>Checks</h2>
+<table><tr><th>Code</th><th>What</th><th>How</th></tr>
+<tr><td><code>E_SAFETY_HEAP</code></td><td>Dynamic-lifetime ops</td><td><code>Alloca/HwIntrinsic/MoveToDevice</code> or calls exactly <code>move_to_device|box|alloc|malloc|calloc|realloc</code> (exact match — <code>allocate</code> is clean)</td></tr>
+<tr><td><code>E_SAFETY_RECURSION</code></td><td>Direct + indirect recursion</td><td>Call-graph reachability over defined functions</td></tr>
+<tr><td><code>E_SAFETY_LOOP</code></td><td>Unbounded loops</td><td>Kosaraju SCCs; cycle with no exit edge. Constant <code>const.N</code> conditions folded (<code>while true</code> unbounded, <code>while false</code> accepted)</td></tr>
+<tr><td><code>E_SAFETY_STACK</code></td><td>Frame overflow</td><td><code>32 + 4×(params + dest regs)</code> vs <code>#[max_stack(N)]</code>, else <code>--safety-stack-limit</code></td></tr>
+<tr><td><code>E_SAFETY_WCET</code></td><td>Bound overflow</td><td><code>#[wcet_cycles(N)]</code> vs instruction count (crude structural proxy, not a timing model)</td></tr></table>
+<h2>Attributes &amp; policy</h2>
+<ul>
+<li><code>#[max_stack(N)]</code>, <code>#[wcet_cycles(N)]</code> collected by parser → <code>FnDecl.attrs</code> → <code>MirFunction.attrs</code>; attribute beats CLI flag. Unknown attributes → <code>W_UNKNOWN_ATTR</code> warning. Attributes on kernels dropped.</li>
+<li>Enforcement is uniform across <code>Safe/Unsafe/Trusted</code> tiers.</li>
+<li>Hardware-targeted functions (non-CPU <code>@hw::</code>) are skipped and listed; <code>formal_verification.rs</code> stays emit-only.</li>
+<li>Clean runs print to stderr: <code>safety profile X: N functions checked (M skipped), 0 violations</code>.</li>
+</ul>
+<h2>What safety is not</h2>
+<p>Analysis (real, CPU subset) ≠ policy (same rules, three names) ≠ estimates (rough, not measured) ≠ hardware behavior (nothing executes on accelerators). Stack/WCET numbers are not certification evidence.</p>
+</body>
+</html>

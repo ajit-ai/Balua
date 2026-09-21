@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balua Compiler</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;line-height:1.6;color:#1a1a1a}
+nav{background:#0b2a4a;color:#fff;padding:.7em 1em;border-radius:8px}
+nav a{color:#9fd0ff;margin-right:.8em;text-decoration:none;font-size:.92em}
+code{background:#f2f4f8;padding:.1em .35em;border-radius:4px}
+pre{background:#0f172a;color:#e2e8f0;padding:1em;border-radius:8px;overflow:auto}
+h1,h2{color:#0b2a4a} h2{border-bottom:2px solid #dbe4f0;padding-bottom:.2em}
+</style>
+</head>
+<body>
+<nav><strong>Balua Docs</strong> &nbsp; <a href="index.html">Index</a><a href="language.html">Language</a><a href="features.html">Features</a><a href="principles.html">Principles</a><a href="compiler.html">Compiler</a><a href="architecture.html">Arch</a><a href="heterogeneous.html">Hetero</a><a href="safety.html">Safety</a><a href="packages.html">Packages</a><a href="examples.html">Examples</a><a href="development.html">Dev</a><a href="changelog.html">Changes</a><a href="roadmap.html">Roadmap</a><a href="roadmap-detail.html">Detail</a></nav>
+<h1>Balua Compiler</h1>
+<p>Rust (<code>baluac_lib</code> + <code>balua</code>/<code>baluac</code> bins). Entry <code>main.rs:65</code>. Any <code>Error</code> diagnostic blocks <code>-o</code>.</p>
+<h2>Stages</h2>
+<ul>
+<li><strong>Lexer</strong> (<code>lexer.rs</code>): UTF-8, 47 keywords, <code>@hw::</code> directives, <code>#[...]</code> annotations, spans.</li>
+<li><strong>Parser</strong> (<code>parser.rs</code>): recursive descent; top-level <code>module</code> blocks; fn/let/const/if/match/for/while/loop/return/break/continue/spawn/chan/select/unsafe/extern. No precedence table, no paren grouping.</li>
+<li><strong>AST</strong> (<code>ast.rs</code>): 14 item variants; <code>FnDecl</code> carries generics/visibility/tiers/raw attrs. Most expr spans are defaults.</li>
+<li><strong>Semantic</strong> (<code>semantic.rs</code>): HM-style unify + borrow/move + hw validation → <code>E_TYPE_MISMATCH E_USE_AFTER_MOVE E_BORROW_CONFLICT E_HW_*</code>. Imports unresolved.</li>
+<li><strong>MIR</strong> (<code>mir.rs</code>): SSA blocks; real <code>FnDecl</code> lowering; kernels → intrinsic+trap; strings → null; casts pass through; calls need <code>Ident</code>.</li>
+<li><strong>Backends</strong>: Cranelift real (<code>i32</code> objects + host link). LLVM/PTX/SPIR-V/HLS/QASM/MLIR are template text. <code>baluald</code> unused stub.</li>
+</ul>
+<h2>CLI</h2>
+<pre>balua [files...] [--emit-mir] [--emit-llvm] [--emit-clif] [--backend HW]
+  [--cpu-backend llvm|cranelift] [--release] [-o EXE] [--keep-object]
+  [--target TRIPLE] [--json-diagnostics] [--safety-profile P]
+  [--safety-stack-limit N] [--verbose]</pre>
+<p><code>main()</code> returning <code>i32</code> becomes the exit code. No optimization passes exist (<code>--release</code> only selects Cranelift speed mode).</p>
+</body>
+</html>

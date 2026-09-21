@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balua Runtime and Packages</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;max-width:1000px;margin:2em auto;padding:0 1em;line-height:1.6;color:#1a1a1a}
+nav{background:#0b2a4a;color:#fff;padding:.7em 1em;border-radius:8px}
+nav a{color:#9fd0ff;margin-right:.8em;text-decoration:none;font-size:.92em}
+code{background:#f2f4f8;padding:.1em .35em;border-radius:4px}
+pre{background:#0f172a;color:#e2e8f0;padding:1em;border-radius:8px;overflow:auto}
+h1,h2{color:#0b2a4a} h2{border-bottom:2px solid #dbe4f0;padding-bottom:.2em}
+</style>
+</head>
+<body>
+<nav><strong>Balua Docs</strong> &nbsp; <a href="index.html">Index</a><a href="language.html">Language</a><a href="features.html">Features</a><a href="principles.html">Principles</a><a href="compiler.html">Compiler</a><a href="architecture.html">Arch</a><a href="heterogeneous.html">Hetero</a><a href="safety.html">Safety</a><a href="packages.html">Packages</a><a href="examples.html">Examples</a><a href="development.html">Dev</a><a href="changelog.html">Changes</a><a href="roadmap.html">Roadmap</a><a href="roadmap-detail.html">Detail</a></nav>
+<h1>Runtime and Packages</h1>
+<p><strong>No Balua runtime exists.</strong> Executables are standalone; <code>main() -&gt; i32</code> becomes the exit code. Strings lower to null, concurrency has no lowering, HAL is unlinked text.</p>
+<h2>Package manager (<code>blpkg</code>/<code>BPM</code>)</h2>
+<ul>
+<li><code>new</code> — scaffolds <code>Balua.toml</code> + <code>src/main.bl</code> (real).</li>
+<li><code>build</code> — parses manifest, compiles <code>src/main.bl</code> via <code>baluac</code> lib → <code>target/debug/&lt;name&gt;.exe</code> (real, local-only; non-CPU targets note post-GA).</li>
+<li><code>run</code> — builds then executes, reports exit (real).</li>
+<li><code>test</code> — builds then executes, reports <code>test(sim)</code> (minimal; no Balua harness yet).</li>
+<li><code>add name[@req]</code> — semver validation, local-only (real).</li>
+<li><code>publish</code> — explicit post-GA error (no fake success).</li>
+<li><code>bench/doc/fmt/lint/cross</code> — prints (post-GA). <code>bom</code> — CycloneDX-style TOML, full variant with provenance fields.</li>
+</ul>
+<pre>blpkg new demo &amp;&amp; blpkg build &amp;&amp; blpkg run &amp;&amp; blpkg test</pre>
+</body>
+</html>
