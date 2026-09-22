@@ -24,6 +24,11 @@ CI (``.github/workflows/ci.yml``)
 - ``test-runner`` (windows): ``balua-test`` on ``tests/pass.bl`` plus a
   ``--bench=2`` timing pass.
 - ``blpkg`` (windows): build the manager; ``--help`` smoke.
+- ``llvm`` (windows, E1): installs LLVM 19.1.4, builds with
+  ``--features llvm``, runs lib tests plus the execution suite with
+  ``BALUA_CPU_BACKEND=llvm`` (same 17 cases through the LLVM backend),
+  ``--emit-llvm`` IR smoke, and an ``-o`` link smoke. Local machines
+  without LLVM 19 cannot run this job; the default build is unaffected.
 - ``docs`` (ubuntu): install ``docs/requirements.txt`` and run
   ``sphinx-build -b html -W docs docs/_build/html`` — warnings fail the
   build.

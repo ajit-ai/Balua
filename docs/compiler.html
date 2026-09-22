@@ -24,7 +24,7 @@ h1,h2{color:#0b2a4a} h2{border-bottom:2px solid #dbe4f0;padding-bottom:.2em}
 <li><strong>AST</strong> (<code>ast.rs</code>): 14 item variants; <code>FnDecl</code> carries generics/visibility/tiers/raw attrs. Most expr spans are defaults.</li>
 <li><strong>Semantic</strong> (<code>semantic.rs</code>): HM-style unify + borrow/move + hw validation → <code>E_TYPE_MISMATCH E_USE_AFTER_MOVE E_BORROW_CONFLICT E_HW_*</code>. Imports unresolved.</li>
 <li><strong>MIR</strong> (<code>mir.rs</code>): SSA blocks; real <code>FnDecl</code> lowering; kernels → intrinsic+trap; strings → null; casts pass through; calls need <code>Ident</code>.</li>
-<li><strong>Backends</strong>: Cranelift real (<code>i32</code> objects + host link). LLVM/PTX/SPIR-V/HLS/QASM/MLIR are template text. <code>baluald</code> unused stub.</li>
+<li><strong>Backends</strong>: Cranelift real (<code>i32</code> objects + host link, default). LLVM dual-mode: string IR by default, real module/object emission via llvm-sys 191 behind <code>--features llvm</code> (<code>--cpu-backend llvm</code>, fail-closed otherwise). PTX/SPIR-V/HLS/QASM/MLIR are template text. <code>baluald</code> unused stub.</li>
 </ul>
 <h2>CLI</h2>
 <pre>balua [files...] [--emit-mir] [--emit-llvm] [--emit-clif] [--backend HW]

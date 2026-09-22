@@ -63,9 +63,16 @@ Dispatch: ``select_backend`` (``backend/mod.rs:21``).
   links it with the host toolchain (``cc``/``gcc``/``clang``/``cl`` probe)
   into a runnable executable. Unknown callees are link-time errors.
   Hardware intrinsics and device moves lower to zero-fill.
-- **LLVM (template)**: ``backend/llvm.rs:20`` emits string-builder IR with
-  per-arch datalayout text; the ``llvm`` cargo feature is empty and
-  ``lower_llvm_sys`` is a placeholder string.
+- **LLVM (dual-mode)**: ``backend/llvm.rs:20`` emits string-builder IR by
+  default; with ``--features llvm`` (llvm-sys 191, LLVM 19.1.x via
+  ``LLVM_SYS_191_PREFIX``) it builds a real in-memory module (alloca model:
+  every virtual register gets an entry-block slot; integer ``i32`` domain
+  like Cranelift) and can emit native objects (``compile_llvm_to_object``)
+  for ``-o``. ``--cpu-backend`` selects ``cranelift`` (default, works
+  everywhere) or ``llvm`` (fail-closed guidance without the feature).
+  ``lto``/``pgo``/``bolt`` fields are accepted but unimplemented; machine
+  emission is host-targeted (``--target`` triple is recorded, cross-target
+  objects not validated).
 - **PTX / SPIR-V / HLS / OpenQASM / MLIR (templates)**: fixed headers
   (PTX 8.0 + ``wmma`` strings, SPIR-V 1.6 opcodes, HLS pragmas + Tcl,
   QASM gate list, ``balua`` dialect skeleton) with ``MIR: {:?}`` comments.

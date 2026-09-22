@@ -29,9 +29,10 @@ cranelift-frontend.workspace = true
 cranelift-module.workspace = true
 cranelift-object.workspace = true
 target-lexicon.workspace = true
+llvm-sys = { workspace = true, optional = true }
 
 [features]
-llvm = []
+llvm = ["dep:llvm-sys"]
 default = []
 
 [dev-dependencies]

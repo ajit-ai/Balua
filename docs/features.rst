@@ -96,7 +96,7 @@ Selection: ``crates/baluac/src/backend/mod.rs:21`` ``select_backend(hw)``.
 
 - LLVM (``crates/baluac/src/backend/llvm.rs:1``):
   ``x86_64/aarch64/riscv64/arm-none-eabi``, LTO/PGO/BOLT,
-  string-builder IR + optional ``llvm-sys 18`` via ``--features llvm``,
+  string-builder IR + optional ``llvm-sys 191`` via ``--features llvm``,
   ``O3``, auto-vectorize AVX-512, thin LTO, per-arch datalayout.
 - Cranelift (``crates/baluac/src/backend/cranelift.rs:1``):
   fast debug backend for 4GB hosts; ``--cpu-backend cranelift``,

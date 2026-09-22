@@ -29,8 +29,9 @@ struct Args {
     #[arg(long)]
     backend: Option<String>,
 
-    /// CPU backend: llvm (default release, LTO) or cranelift (fast debug, 4GB host)
-    #[arg(long, default_value = "llvm")]
+    /// CPU backend: cranelift (fast debug, default) or llvm (release, LTO;
+    /// requires building with --features llvm, else a clear error)
+    #[arg(long, default_value = "cranelift")]
     cpu_backend: String,
 
     /// Release mode: Cranelift opt_level 2 (speed). Default is debug (opt 0).
@@ -174,16 +175,31 @@ fn main() -> anyhow::Result<()> {
             std::process::exit(1);
         }
     } else if let Some(out) = &args.output {
-        // Phase 2: produce a linked executable via the Cranelift backend.
+        // Produce a linked executable via the selected CPU backend.
         // Debug default opt 0; --release selects opt 2 (speed).
         let opt: u8 = if args.release { 2 } else { 0 };
-        let summary = baluac_lib::backend::object_emit::build_executable(
-            &mir_all,
-            out,
-            opt,
-            args.keep_object,
-        )?;
-        let _ = summary;
+        match args.cpu_backend.as_str() {
+            "cranelift" => {
+                let summary = baluac_lib::backend::object_emit::build_executable(
+                    &mir_all,
+                    out,
+                    opt,
+                    args.keep_object,
+                )?;
+                let _ = summary;
+            }
+            "llvm" => {
+                let summary = baluac_lib::backend::llvm::build_executable_llvm(
+                    &mir_all,
+                    out,
+                    &args.target,
+                    opt,
+                    args.keep_object,
+                )?;
+                let _ = summary;
+            }
+            other => anyhow::bail!("unknown --cpu-backend '{}' (expected llvm|cranelift)", other),
+        }
         println!("balua: produced executable {}", out.display());
     } else if !args.emit_llvm && !args.emit_mir {
         let exe = std::env::current_exe().ok().and_then(|p| p.file_name().map(|n| n.to_string_lossy().into_owned())).unwrap_or("balua".into());

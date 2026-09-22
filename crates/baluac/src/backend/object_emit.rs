@@ -94,7 +94,7 @@ fn temp_object_path(out_exe: &Path) -> PathBuf {
     PathBuf::from(p)
 }
 
-fn ensure_exe_extension(out: &Path) -> PathBuf {
+pub(crate) fn ensure_exe_extension(out: &Path) -> PathBuf {
     #[cfg(target_os = "windows")]
     {
         if out.extension().is_none() {

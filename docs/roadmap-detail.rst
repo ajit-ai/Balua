@@ -131,7 +131,8 @@ Objective: ``main@v1.0-ga`` installable. ``develop → main --no-ff``
 Post-GA backlog (each: own ``phase/*`` + executable exit + tag)
 ----------------------------------------------------------------
 
-- **E1 LLVM-real** — ``llvm-sys 18``, O3 + thin LTO
+- **E1 LLVM-real** — ``llvm-sys 191`` (LLVM 19.1.x), O-levels + host machine
+  emit
   (``backend/llvm.rs:30``); ``02_cpu_simd_sort`` bench.
 - **E2 Parallelism runtime** — ``spawn/chan/select`` + ``Send/Sync``
   executor (``std/sync.bl``, ``std/future.bl``).

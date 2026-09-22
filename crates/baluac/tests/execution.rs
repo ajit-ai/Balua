@@ -122,8 +122,14 @@ fn run_case(name: &str, src: &str) -> Result<i32, String> {
     std::fs::write(&src_path, src).map_err(|e| format!("write src: {}", e))?;
 
     // Compile + link (balua driver, -o produces a linked executable).
+    // Backend under test comes from BALUA_CPU_BACKEND (default cranelift);
+    // the llvm CI job sets it to llvm with `--features llvm`, so this one
+    // suite exercises both CPU backends.
+    let backend = std::env::var("BALUA_CPU_BACKEND").unwrap_or_else(|_| "cranelift".into());
     let status = Command::new(balua_bin())
         .arg(&src_path)
+        .arg("--cpu-backend")
+        .arg(&backend)
         .arg("-o")
         .arg(&exe_path)
         .stdout(Stdio::null())
