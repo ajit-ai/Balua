@@ -7,7 +7,7 @@ use clap::Parser as ClapParser;
 use std::path::PathBuf;
 
 #[derive(ClapParser, Debug)]
-#[command(name = "balua", version, about = "Balua system programming language compiler — balua.exe (Windows 11). Package manager: BPM.exe. Legacy alias: baluac.exe")]
+#[command(name = "balua", version = "v1.0-ga", about = "Balua system programming language compiler — balua.exe (Windows 11). Package manager: BPM.exe. Legacy alias: baluac.exe")]
 struct Args {
     /// Input Balua source files (.bl)
     #[arg(required = true)]

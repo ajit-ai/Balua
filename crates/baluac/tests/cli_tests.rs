@@ -41,6 +41,18 @@ fn cli_flags_stable() {
     }
 }
 
+/// Release version stamp (M4): `balua --version` reports the GA release.
+#[test]
+fn cli_version_is_ga() {
+    let out = Command::new(balua_bin())
+        .arg("--version")
+        .output()
+        .expect("run balua --version");
+    assert!(out.status.success(), "balua --version failed");
+    let text = String::from_utf8_lossy(&out.stdout).into_owned();
+    assert!(text.contains("v1.0-ga"), "expected GA version stamp, got {:?}", text);
+}
+
 /// Driver stays a multi-file compiler: passing two inputs is accepted.
 #[test]
 fn cli_accepts_multiple_files() {

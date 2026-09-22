@@ -41,11 +41,16 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.cmd {
         Cmd::New { name } => {
-            std::fs::create_dir_all(&name)?;
-            std::fs::write(format!("{}/Balua.toml", name), format!("[package]\nname=\"{}\"\nversion=\"0.1.0\"\nedition=\"2026\"\n", name))?;
-            std::fs::create_dir_all(format!("{}/src", name))?;
-            std::fs::write(format!("{}/src/main.bl", name), "fn main() -> i32 { 0 }\n")?;
-            println!("Created Balua package '{}'", name);
+            // The package name is the final path component: `blpkg new
+            // C:/path/demo` must record `demo`, not the path (backslashes
+            // break TOML parsing of Balua.toml).
+            let dir = std::path::PathBuf::from(&name);
+            let pkg = package_name(&dir);
+            std::fs::create_dir_all(&dir)?;
+            std::fs::write(dir.join("Balua.toml"), format!("[package]\nname=\"{}\"\nversion=\"0.1.0\"\nedition=\"2026\"\n", pkg))?;
+            std::fs::create_dir_all(dir.join("src"))?;
+            std::fs::write(dir.join("src/main.bl"), "fn main() -> i32 { 0 }\n")?;
+            println!("Created Balua package '{}'", pkg);
         }
         Cmd::Build { target, release } => {
             let profile = if release { "release" } else { "debug" };
@@ -83,4 +88,23 @@ fn main() -> Result<()> {
         Cmd::Bom => { println!("{}", bom::generate_bom(&[])); },
     }
     Ok(())
+}
+
+/// Package name for `blpkg new <path>`: the final path component.
+fn package_name(dir: &std::path::Path) -> String {
+    dir.file_name()
+        .and_then(|s| s.to_str())
+        .unwrap_or_default()
+        .to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn package_name_uses_final_component() {
+        assert_eq!(package_name(std::path::Path::new("demo")), "demo");
+        assert_eq!(package_name(std::path::Path::new("C:/a/b/demo")), "demo");
+    }
 }
