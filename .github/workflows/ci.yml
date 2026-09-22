@@ -35,16 +35,27 @@ jobs:
       - run: cargo run -q -p balua-test -- tests/pass.bl
       - run: cargo run -q -p balua-test -- --bench=2 tests/pass.bl
   llvm:
+    # Real LLVM verification (E1 exit proof). Upstream Windows installers
+    # lack llvm-config, so this job uses MSYS2/MinGW64 LLVM (dev package,
+    # compiler-matched with the GNU Rust toolchain per llvm-sys docs).
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable-x86_64-pc-windows-gnu
       - uses: Swatinem/rust-cache@v2
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: mingw-w64-x86_64-llvm mingw-w64-x86_64-gcc
       - run: |
-          Invoke-WebRequest -Uri https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.4/LLVM-19.1.4-win64.exe -OutFile $env:TEMP/llvm.exe
-          Start-Process $env:TEMP/llvm.exe -ArgumentList "/S" -Wait
-          "LLVM_SYS_191_PREFIX=C:\Program Files\LLVM" >> $env:GITHUB_ENV
-          "C:\Program Files\LLVM\bin" >> $env:GITHUB_PATH
+          echo "LLVM_SYS_221_PREFIX=$(llvm-config --prefix)" >> $GITHUB_ENV
+          llvm-config --version
       - run: cargo build -p baluac --features llvm
       - run: cargo test -p baluac --features llvm --lib
       - run: cargo test -p baluac --features llvm --test execution

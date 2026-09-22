@@ -64,8 +64,8 @@ Dispatch: ``select_backend`` (``backend/mod.rs:21``).
   into a runnable executable. Unknown callees are link-time errors.
   Hardware intrinsics and device moves lower to zero-fill.
 - **LLVM (dual-mode)**: ``backend/llvm.rs:20`` emits string-builder IR by
-  default; with ``--features llvm`` (llvm-sys 191, LLVM 19.1.x via
-  ``LLVM_SYS_191_PREFIX``) it builds a real in-memory module (alloca model:
+  default; with ``--features llvm`` (llvm-sys 221, LLVM 22.1.x via
+  ``LLVM_SYS_221_PREFIX``) it builds a real in-memory module (alloca model:
   every virtual register gets an entry-block slot; integer ``i32`` domain
   like Cranelift) and can emit native objects (``compile_llvm_to_object``)
   for ``-o``. ``--cpu-backend`` selects ``cranelift`` (default, works

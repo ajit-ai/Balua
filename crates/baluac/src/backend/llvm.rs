@@ -1,6 +1,6 @@
 //! LLVM IR backend — CPU targets (x86_64, aarch64, riscv64, arm-none-eabi)
 //! Two modes: string-builder IR (default, no LLVM linked) and real codegen
-//! via llvm-sys 191 (LLVM 19.1.x) behind `--features llvm`.
+//! via llvm-sys 221 (LLVM 22.1.x) behind `--features llvm`.
 //!
 //! Real mode lowers MIR with an alloca model (every virtual register gets an
 //! entry-block `alloca`; defs store, uses load), which is correct for any CFG
@@ -11,7 +11,7 @@
 //! `lto`/`pgo`/`bolt` fields are accepted but not implemented (recorded for
 //! post-E1 work).
 //!
-//! Requires LLVM 19 on PATH or `LLVM_SYS_191_PREFIX` at build time.
+//! Requires LLVM 22 on PATH or `LLVM_SYS_221_PREFIX` at build time.
 
 use super::Backend;
 use crate::mir::{MirModule, Instruction, Terminator};
@@ -39,9 +39,9 @@ impl Backend for LlvmBackend {
 impl LlvmBackend {
     #[cfg(feature = "llvm")]
     fn lower_llvm_sys(&self, modules: &[MirModule]) -> anyhow::Result<String> {
-        // Real llvm-sys 191 codegen (LLVM 19.1.x): build an in-memory module
-        // from MIR and print it. Requires LLVM 19 on PATH or
-        // LLVM_SYS_191_PREFIX at build time.
+        // Real llvm-sys 221 codegen (LLVM 22.1.x): build an in-memory module
+        // from MIR and print it. Requires LLVM 22 on PATH or
+        // LLVM_SYS_221_PREFIX at build time.
         let (ctx, module) = sys::build_module(modules)?;
         let text = sys::print_module(module);
         unsafe {
@@ -150,11 +150,11 @@ pub fn build_executable_llvm(
     _keep_object: bool,
 ) -> anyhow::Result<std::path::PathBuf> {
     Err(anyhow::anyhow!(
-        "--cpu-backend llvm requires building with --features llvm (LLVM 19.1.x via LLVM_SYS_191_PREFIX or llvm-config); use --cpu-backend cranelift"
+        "--cpu-backend llvm requires building with --features llvm (LLVM 22.1.x via LLVM_SYS_221_PREFIX or llvm-config); use --cpu-backend cranelift"
     ))
 }
 
-/// Real LLVM lowering (feature `llvm`, llvm-sys 191). Alloca model: every
+/// Real LLVM lowering (feature `llvm`, llvm-sys 221). Alloca model: every
 /// virtual register gets an entry-block `alloca`; definitions store, uses
 /// load. Uses only long-stable C API functions.
 #[cfg(feature = "llvm")]
