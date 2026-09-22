@@ -1,6 +1,11 @@
 # balua-test
 
-Test framework — #[test], #[test(target=gpu)], #[bench] (Section 8.1 / 9.1).
+Compile-and-run test harness. Convention: each target `.bl` file is a
+program whose `main` exit code is the verdict — passes iff it compiles,
+links, and exits 0 (the same convention self-checking examples use).
+`--bench[=N]` reruns targets and reports mean time. There is no
+Balua-level unit-test attribute yet (`#[bench]` timing only, post-GA scope
+for richer harnesses).
 
-Stub: implementation lives in Rust under this folder. Run with `cargo run -p balua-test`.
+Usage: `cargo run -p balua-test -- [--bench[=N]] <files-or-dirs...>`.
 

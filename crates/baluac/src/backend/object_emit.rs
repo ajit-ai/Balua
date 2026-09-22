@@ -36,6 +36,12 @@ fn find_linker() -> Option<(&'static str, &'static str)> {
 }
 
 /// Link `obj_path` into an executable at `exe_path` using the host C toolchain.
+///
+/// Determinism: GNU linkers get `-Wl,--no-insert-timestamp
+/// -Wl,--build-id=none` so repeated builds are byte-identical (M3: objects
+/// already are; this closes the linked-executable half on gcc/clang/cc).
+/// MSVC `cl` has no equivalent probe here (`link /Brepro` is the analogue,
+/// unverified on this host) and links as before.
 pub fn link_executable(obj_path: &Path, exe_path: &Path) -> Result<()> {
     let Some((linker, _)) = find_linker() else {
         return Err(anyhow!(
@@ -43,6 +49,9 @@ pub fn link_executable(obj_path: &Path, exe_path: &Path) -> Result<()> {
         ));
     };
     let mut cmd = Command::new(linker);
+    if linker != "cl" {
+        cmd.arg("-Wl,--no-insert-timestamp").arg("-Wl,--build-id=none");
+    }
     cmd.arg(obj_path).arg("-o").arg(exe_path);
     // Windows executable extension if not provided
     let output = cmd

@@ -14,6 +14,7 @@ Balua is a statically-typed, compiled system language for heterogeneous compute.
 - Source encoding: UTF-8, Unicode identifiers.
 - Tokens: KEYWORD, IDENTIFIER, LITERAL_INT/FLOAT/STR/BOOL, OPERATOR, DELIMITER, COMMENT, HARDWARE_DIRECTIVE (`@hw::`), ANNOTATION (`#[...]`, `#pragma`), EOF.
 - Keywords ~40 (`fn`, `let`, `kernel`, `circuit`, `tensor`, `qubit`, ...). See Appendix A.
+- Formatting (M3): `balua-fmt` normalizes whitespace/indentation from the token stream only (LF endings, single blank lines kept, `};` joined); it never reorders tokens and is idempotent. All in-repo `.bl` files are formatter-clean (`*.bl text eol=lf`).
 
 ## Chapter 3 — Types
 - Primitives: `i8`..`i128`, `u8`..`u128`, `f16`/`f32`/`f64`/`f128`, `fp16`/`bf16`/`tf32`, `bool`, `char`, `qubit[N]`, `*mut T`/`*const T`/`&T`/`&mut T`, `v128<T>`/`v256<T>`/`v512<T>`.
@@ -54,6 +55,8 @@ Single owner, move semantics, `&T`/`&mut T`, `box<T>::new`, lifetimes `'a`, hard
 
 ## Chapter 14 — Compiler & Toolchain Reference
 `baluac` stages: Lexer → Parser (recursive-descent, typed AST) → Semantic (HM + ownership) → MIR (SSA, hw-annotated BBs) → LLVM/PTX/SPIR-V/HLS/QASM/MLIR → `baluald`. `blpkg` commands: `new/build/run/test/bench/add/publish/doc/fmt/lint/cross`. Tools: `balua-fmt/lsp/dbg/prof/doc/test/bindgen`.
+
+M3 tooling guarantees (implemented): `balua-fmt` (`--check`/`--write`/stdout, directory-aware, idempotent, token-preserving); `balua-test` (compile-link-run harness, pass iff exit 0, `--bench[=N]` mean timing, per-run timeout); frozen CLI flags (see `crates/baluac/tests/cli_tests.rs`); diagnostics JSON schema frozen (`severity/code/message/span/file/line/col/end_line/end_col/hint/hardware_context`; profile `events/kind/duration_ms/detail/total_ms`; `EventKind` renders `Lex/Parse/Semantic/...` capitalized); fuzz smoke (fixed-seed token soup + full `.bl` corpus, no-panic contract); reproducibility (`.o` byte-identical; linked `.exe` byte-identical via `-Wl,--no-insert-timestamp -Wl,--build-id=none` on GNU toolchains, MSVC unverified); CI (`build`, `fmt --check`, `test-runner`, `blpkg`, strict Sphinx docs).
 
 ## Chapter 15 — Grammar (full EBNF)
 See `spec/grammar/balua.ebnf` — LL(k) unambiguous.

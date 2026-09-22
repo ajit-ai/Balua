@@ -1,2 +1,7 @@
 // std::fmt — Display, Debug, format traits
-module std::fmt { pub trait Display {} pub trait Debug {} }
+module std::fmt {
+    pub trait Display {
+    }
+    pub trait Debug {
+    }
+}

@@ -1,0 +1,4 @@
+// CI smoke target for balua-test: passes iff it compiles, links, exits 0.
+fn main() -> i32 {
+    0
+}

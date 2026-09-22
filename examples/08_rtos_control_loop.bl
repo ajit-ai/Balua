@@ -3,14 +3,19 @@
 #![no_panic]
 
 module main {
-    use std::hal::embedded::{Pin, irq_attach};
+    use std::hal::embedded::{
+        Pin, irq_attach
+};
 
     #[max_stack(512)]
     #[wcet_cycles(1000)]
     fn control_loop(setpoint: f32, measured: f32) -> f32 {
-        let kp: f32 = 1.0; let ki: f32 = 0.1; let kd: f32 = 0.01;
+        let kp: f32 = 1.0;
+        let ki: f32 = 0.1;
+        let kd: f32 = 0.01;
         let error = setpoint - measured;
-        kp * error // simplified PID — real: integral/derivative with WCET-bounded loops
+        kp * error
+// simplified PID — real: integral/derivative with WCET-bounded loops
     }
 
     #[interrupt_handler(IRQ=TIM2)]
@@ -19,5 +24,7 @@ module main {
         // write PWM — borrow checker ensures no data race
     }
 
-    fn main() -> i32 { 0 }
+    fn main() -> i32 {
+        0
+}
 }

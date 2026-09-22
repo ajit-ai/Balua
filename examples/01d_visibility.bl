@@ -10,17 +10,17 @@ module main {
     // pub fn — public API
     pub fn public_api() -> i32 {
         MAX_VAL + INTERNAL
-    }
+}
 
     // priv fn — internal helper
     priv fn internal_helper() -> i32 {
         INTERNAL * 2
-    }
+}
 
     // pub fn using priv helper
     pub fn combined() -> i32 {
         public_api() + internal_helper()
-    }
+}
 
     fn main() -> i32 {
         let a = public_api();
@@ -28,7 +28,7 @@ module main {
         let c = combined();
         if a == 142 && b == 84 && c == 226 && MAX_VAL == 100 && INTERNAL == 42 {
             println("01d_visibility: pub/priv const and fn working")
-        };
+};
         0
-    }
+}
 }

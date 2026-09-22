@@ -4,8 +4,7 @@ module main {
     use std::hal::npu;
 
     // wmma GEMM on GPU
-    @hw::gpu(backend=cuda, sm=90)
-    kernel fn wmma_gemm(A: &[f32], B: &[f32], C: &mut [f32], N: u32) -> void {
+    @hw::gpu(backend = cuda, sm = 90) kernel fn wmma_gemm(A: & [f32], B: & [f32], C: & mut[f32], N: u32) -> void {
         let row = thread_id::x();
         let col = thread_id::y();
         let mut acc: f32 = 0.0;
@@ -16,14 +15,13 @@ module main {
     }
 
     // NPU model inference
-    @hw::npu
-    fn npu_classify(input: &[f32]) -> i32 {
+    @hw::npu fn npu_classify(input: & [f32]) -> i32 {
         let result = npu::infer(input);
         result
-    }
+}
 
     fn main() -> i32 {
         println("03a_gpu_npu: @hw::gpu wmma_gemm + @hw::npu classify");
         0
-    }
+}
 }

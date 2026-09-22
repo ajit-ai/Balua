@@ -2,34 +2,34 @@
 module main {
     // Safety tiers on functions
     pub fn safe safe_parse(input: str) -> i32 {
-        input.len()
-    }
+        input . len()
+}
 
-    pub fn unsafe unsafe_mem_copy(src: &[u8], dst: &mut [u8]) -> i32 {
-        src.len()
-    }
+    pub fn unsafe unsafe_mem_copy(src: & [u8], dst: & mut[u8]) -> i32 {
+        src . len()
+}
 
     pub fn trusted trusted_bootloader() -> i32 {
         1
-    }
+}
 
     // visibility for supply chain
     pub fn public_api() -> i32 {
         42
-    }
+}
 
     priv fn internal_impl() -> i32 {
         0
-    }
+}
 
     fn main() -> i32 {
         let a = safe_parse("hello");
-        let b = unsafe_mem_copy([1, 2, 3], &mut [0, 0, 0]);
+        let b = unsafe_mem_copy([1, 2, 3], & mut[0, 0, 0]);
         let c = trusted_bootloader();
         let d = public_api();
         if a == 5 && b == 3 && c == 1 && d == 42 {
             println("04a_safety_bom: safe/unsafe/trusted + pub/priv working")
-        };
+};
         0
-    }
+}
 }

@@ -330,10 +330,12 @@ so ``#[test(sim=true)]`` passes without silicon.
   blpkg run
   blpkg test
 
-Tools in ``tools/``: ``balua-fmt`` (formatter), ``balua-lsp`` (IDE),
-``balua-dbg`` (debugger), ``balua-prof`` (profiler), ``balua-doc``
-(``///`` → HTML/JSON/MD), ``balua-test`` (``#[test]`` / ``#[bench]``),
-``balua-bindgen`` (``.blh``).
+Tools in ``tools/``: ``balua-fmt`` (formatter: ``--check``/``--write``,
+idempotent, token-preserving), ``balua-lsp`` (IDE, stub),
+``balua-dbg`` (debugger, stub), ``balua-prof`` (profiler, stub),
+``balua-doc`` (``///`` → HTML/JSON/MD, stub), ``balua-test``
+(compile-link-run harness: pass iff exit 0, ``--bench[=N]`` timing),
+``balua-bindgen`` (``.blh``, stub).
 
 15. Full hello-hardware walkthrough
 -----------------------------------

@@ -68,3 +68,16 @@ Dependencies on Phase 1's `TypeTable` to source CLIF types.
 
 Keep `GIT_WORKFLOW.md` as-is. A `phase-N` tag is cut only once that phase's exit criteria
 (an executed, verified artifact) are met — not when code compiles.
+
+## M3 DX note (develop, delivered tooling)
+
+DX work delivered outside the language-phase ledger above: `balua-fmt`
+(`--check`/`--write`, idempotent, token-preserving, all in-repo `.bl`
+clean), `balua-test` (exit-0 convention, `--bench`, timeouts), frozen CLI
+flags and diagnostics JSON schema (regression-tested), fixed-seed fuzz
+smoke over token soup plus the full `.bl` corpus (no-panic contract),
+byte-identical `.o` objects and GNU-linked executables
+(`-Wl,--no-insert-timestamp -Wl,--build-id=none`; MSVC unverified), and CI
+jobs (`build`, `fmt`, `test-runner`, `blpkg`, strict Sphinx docs). This
+note does not change the phase ledger; language milestones still gate on
+runnable artifacts per phase.

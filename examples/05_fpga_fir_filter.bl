@@ -1,15 +1,14 @@
 // 05_fpga_fir_filter — 256-tap FIR for SDR, Xilinx ZCU104 (Section 11)
 module main {
-    @hw::fpga(target=ultrascale_plus, clock_mhz=250)
-    circuit fn fir_filter(input: stream<f32>) -> stream<f32> {
+    @hw::fpga(target = ultrascale_plus, clock_mhz = 250) circuit fn fir_filter(input: stream < f32 > ) -> stream < f32 > {
         #pragma pipeline II=1
         // 256-tap FIR — HLS PIPELINE, BRAM coeffs
         input
-    }
+}
 
     fn main() -> i32 {
         println("FIR filter synthesized for xcvu9p @ 250 MHz (Vitis HLS)");
         // blpkg build --target fpga:xilinx:ultrascale_plus
         0
-    }
+}
 }

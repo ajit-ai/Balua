@@ -119,3 +119,44 @@ impl Profile {
         self.events.push(CompileEvent { kind, duration_ms, detail: detail.into() });
     }
 }
+
+/// JSON schema freeze (M3): `--json-diagnostics` and `--verbose` output keys
+/// are a compatibility contract. Renaming a field must update this test, the
+/// docs, and the changelog together.
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn diagnostic_json_schema_stable() {
+        let d = Diagnostic::error("m")
+            .with_code("E_X")
+            .with_span(Span { file: "f.bl".into(), line: 1, col: 2, end_line: 1, end_col: 3 })
+            .with_hint("h")
+            .with_hardware_context("ctx");
+        let v: serde_json::Value = serde_json::from_str(&d.to_json()).unwrap();
+        for key in ["severity", "code", "message", "span", "hint", "hardware_context"] {
+            assert!(v.get(key).is_some(), "diagnostic JSON missing key {:?}", key);
+        }
+        let span = v.get("span").unwrap();
+        for key in ["file", "line", "col", "end_line", "end_col"] {
+            assert!(span.get(key).is_some(), "span JSON missing key {:?}", key);
+        }
+        assert_eq!(v.get("severity").unwrap(), "error");
+    }
+
+    #[test]
+    fn profile_json_schema_stable() {
+        let mut p = Profile::new();
+        p.record(EventKind::Semantic, 3, "a.bl");
+        let v: serde_json::Value = serde_json::from_str(&serde_json::to_string(&p).unwrap()).unwrap();
+        for key in ["events", "total_ms"] {
+            assert!(v.get(key).is_some(), "profile JSON missing key {:?}", key);
+        }
+        let e = &v.get("events").unwrap()[0];
+        for key in ["kind", "duration_ms", "detail"] {
+            assert!(e.get(key).is_some(), "event JSON missing key {:?}", key);
+        }
+        assert_eq!(e.get("kind").unwrap(), "Semantic");
+    }
+}

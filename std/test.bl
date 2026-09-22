@@ -1,2 +1,5 @@
 // std::test — #[test], assert_eq!, benchmark!
-module std::test { pub macro assert_eq!(...) {} }
+module std::test {
+    pub macro assert_eq ! (... ) {
+    }
+}
