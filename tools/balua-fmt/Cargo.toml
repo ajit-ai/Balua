@@ -1,5 +1,9 @@
 [package]
 name = "balua-fmt"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+description = "Balua code formatter — AST-adjacent token formatter preserving @hw:: alignment"
+
+[dependencies]
+baluac = { path = "../../crates/baluac" }
 

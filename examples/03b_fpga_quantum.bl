@@ -4,18 +4,16 @@ module main {
     use std::hal::quantum;
 
     // FPGA FIR filter with HLS DATAFLOW
-    @hw::fpga(xilinx=ultrascale_plus, clock=250)
-    circuit fn fir_filter(signal: &[f32], output: &mut [f32], coeff: &[f32]) -> void {
+    @hw::fpga(xilinx = ultrascale_plus, clock = 250) circuit fn fir_filter(signal: & [f32], output: & mut[f32], coeff: & [f32]) -> void {
         #pragma HLS PIPELINE II=1
         #pragma HLS DATAFLOW
-        for i in 0..signal.len() {
+        for i in 0..signal . len() {
             output[i] = signal[i] * coeff[0];
         }
     }
 
     // Quantum Grover search
-    @hw::quantum(qubits=5)
-    fn grover_search(oracle: &[bool], candidates: &[i32]) -> i32 {
+    @hw::quantum(qubits = 5) fn grover_search(oracle: & [bool], candidates: & [i32]) -> i32 {
         qubits = 5;
         h q[0];
         cx q[0], q[1];
@@ -27,10 +25,10 @@ module main {
         barrier q;
         c = measure q;
         candidates[0]
-    }
+}
 
     fn main() -> i32 {
         println("03b_fpga_quantum: @hw::fpga fir_filter + @hw::quantum grover_search");
         0
-    }
+}
 }

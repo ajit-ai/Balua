@@ -3,26 +3,26 @@ module main {
     // cast as — type conversion
     pub fn cast_test(x: i32) -> f32 {
         x as f32
-    }
+}
 
     pub fn cast_i32_to_f64(x: i32) -> f64 {
         x as f64
-    }
+}
 
     // where clause — generic bounds
-    pub fn where_min<T: Ord, K: Copy>(a: T, b: T) -> T {
+    pub fn where_min < T: Ord, K: Copy > (a: T, b: T) -> T {
         a
-    }
+}
 
-    pub fn where_max<T: Ord, K: Copy>(a: T, b: T) -> T {
+    pub fn where_max < T: Ord, K: Copy > (a: T, b: T) -> T {
         b
-    }
+}
 
     // combined: cast + where
-    pub fn parse_score<T: Ord>(raw: T) -> f32 {
+    pub fn parse_score < T: Ord > (raw: T) -> f32 {
         let _val = raw;
         0.0 as f32
-    }
+}
 
     fn main() -> i32 {
         let a = cast_test(42);
@@ -31,7 +31,7 @@ module main {
         let d = where_max(5, 10);
         if a == 42.0 && b == 10.0 && c == 5 && d == 10 {
             println("01e_cast_where: cast/where working")
-        };
+};
         0
-    }
+}
 }

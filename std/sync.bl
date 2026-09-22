@@ -1,2 +1,6 @@
 // std::sync — Mutex, RwLock, Condvar, Barrier, Semaphore
-module std::sync { pub struct Mutex<T> { data: T } }
+module std::sync {
+    pub struct Mutex < T > {
+        data: T
+}
+}

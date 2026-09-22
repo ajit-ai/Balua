@@ -114,6 +114,7 @@ mod tests {
         let m = MirModule { name: "test".into(), functions: vec![MirFunction {
             name: "add".into(), hardware: None, params: vec![("a".into(), "i32".into()), ("b".into(), "i32".into())],
             basic_blocks: vec![BasicBlock { id: 0, hardware: None, instructions: vec![Instruction::BinOp { dest: "%0".into(), op: "+".into(), lhs: "%a".into(), rhs: "%b".into() }], terminator: Terminator::Return(Some("%0".into())) }],
+            attrs: vec![],
             span: Span { file: "t".into(), line:1, col:1, end_line:1, end_col:1 }
         }] };
         let ir = LlvmBackend { target_triple: "x86_64-pc-windows-msvc".into(), opt_level: 2, lto: true, ..Default::default() }.lower(&[m]).unwrap();

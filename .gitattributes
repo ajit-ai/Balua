@@ -1,0 +1,3 @@
+# Normalize Balua sources to LF so `balua-fmt --check` is stable across
+# platforms (the formatter emits LF only).
+*.bl text eol=lf

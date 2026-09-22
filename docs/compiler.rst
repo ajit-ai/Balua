@@ -83,3 +83,16 @@ CLI
 ``--emit-*`` prints to stdout; diagnostics honor ``--json-diagnostics``;
 ``--verbose`` adds per-stage timings, type-table size, and the safety
 stack report. ``main()`` returning ``i32`` becomes the process exit code.
+The flag set above is frozen by ``crates/baluac/tests/cli_tests.rs``.
+
+Diagnostics JSON schema (frozen)
+---------------------------------
+
+``Diagnostic.to_json()`` keys: ``severity`` (lowercase: ``error``,
+``warning``, ``info``, ``hint``), ``code``, ``message``, ``span``
+(``file``, ``line``, ``col``, ``end_line``, ``end_col``), ``hint``,
+``hardware_context``. Compile profile (``--verbose`` JSON) keys:
+``events`` (``kind``, ``duration_ms``, ``detail``), ``total_ms``; note
+``EventKind`` renders capitalized (``Lex``, ``Parse``, ``Semantic``,
+``Codegen``, ``Link``, ``Opt``). Covered by goldens in
+``crates/baluac/src/diagnostics.rs``.

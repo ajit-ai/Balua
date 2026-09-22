@@ -5,17 +5,19 @@ module sim_tests {
     use std::hal::npu;
 
     #[test(sim=true)]
-    fn test_cpu_fallback() { assert(cpu::core_count() > 0); }
+    fn test_cpu_fallback() {
+        assert(cpu::core_count() > 0);
+    }
 
     #[test(sim=true)]
     fn test_gpu_fallback() {
-        let buf = gpu::DeviceBuf::<f32>::alloc(16);
-        assert(buf.len() == 16);
+        let buf = gpu::DeviceBuf::< f32 > ::alloc(16);
+        assert(buf . len() == 16);
     }
 
     #[test(sim=true)]
     fn test_npu_fallback() {
-        let m = npu::NpuModel::load_onnx("dummy.onnx").unwrap();
+        let m = npu::NpuModel::load_onnx("dummy.onnx") . unwrap();
         assert(true);
     }
 }

@@ -1,2 +1,7 @@
 // std::alloc
-module std::alloc { pub trait Allocator {} pub struct Global; pub struct System; }
+module std::alloc {
+    pub trait Allocator {
+    }
+    pub struct Global;
+    pub struct System;
+}

@@ -12,11 +12,28 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --workspace
-      - run: cargo test -p baluac --test lexer_tests --test parser_tests --test semantic_tests --test safety_tests
+      - run: cargo test -p baluac --test lexer_tests --test parser_tests --test semantic_tests --test safety_tests --test cli_tests --test fuzz_smoke
       - run: cargo test -p blpkg
+      - run: cargo test -p baluac --lib
+      - run: cargo test -p balua-fmt -p balua-test
       - run: cargo test -p baluac --test execution
       - run: cargo run -q -p baluac --bin balua -- examples/01_hello_hardware.bl --emit-mir
       - run: cargo run -q -p baluac --bin balua -- hello.bl -o hello-ci.exe
+  fmt:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo run -q -p balua-fmt -- --check hello.bl keyword_test.bl examples tests tests/hal selfhost std std/hal std/ffi
+  test-runner:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo run -q -p balua-test -- tests/pass.bl
+      - run: cargo run -q -p balua-test -- --bench=2 tests/pass.bl
   blpkg:
     runs-on: windows-latest
     steps:

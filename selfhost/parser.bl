@@ -4,71 +4,71 @@
 fn parse_program(src: str) -> Program {
     let tokens = lex(src);
     let mut parser = Parser::new(tokens);
-    parser.parse_program()
+    parser . parse_program()
 }
 
-fn parse_fn_decl(tokens: Vec<Token>) -> FnDecl {
+fn parse_fn_decl(tokens: Vec < Token > ) -> FnDecl {
     let mut p = Parser::new(tokens);
-    p.parse_fn_decl()
+    p . parse_fn_decl()
 }
 
-fn parse_expr(tokens: Vec<Token>) -> Expr {
+fn parse_expr(tokens: Vec < Token > ) -> Expr {
     let mut p = Parser::new(tokens);
-    p.parse_expr()
+    p . parse_expr()
 }
 
-fn parse_block(tokens: Vec<Token>) -> Block {
+fn parse_block(tokens: Vec < Token > ) -> Block {
     let mut p = Parser::new(tokens);
-    p.parse_block()
+    p . parse_block()
 }
 
-fn parse_const_decl(tokens: Vec<Token>) -> ConstDecl {
+fn parse_const_decl(tokens: Vec < Token > ) -> ConstDecl {
     let mut p = Parser::new(tokens);
-    p.parse_const_decl()
+    p . parse_const_decl()
 }
 
-fn parse_struct(tokens: Vec<Token>) -> StructDecl {
+fn parse_struct(tokens: Vec < Token > ) -> StructDecl {
     let mut p = Parser::new(tokens);
-    p.parse_struct()
+    p . parse_struct()
 }
 
-fn parse_enum(tokens: Vec<Token>) -> EnumDecl {
+fn parse_enum(tokens: Vec < Token > ) -> EnumDecl {
     let mut p = Parser::new(tokens);
-    p.parse_enum()
+    p . parse_enum()
 }
 
-fn parse_trait(tokens: Vec<Token>) -> TraitDecl {
+fn parse_trait(tokens: Vec < Token > ) -> TraitDecl {
     let mut p = Parser::new(tokens);
-    p.parse_trait()
+    p . parse_trait()
 }
 
-fn parse_impl(tokens: Vec<Token>) -> ImplDecl {
+fn parse_impl(tokens: Vec < Token > ) -> ImplDecl {
     let mut p = Parser::new(tokens);
-    p.parse_impl()
+    p . parse_impl()
 }
 
-fn parse_ffi(tokens: Vec<Token>) -> FFIDecl {
+fn parse_ffi(tokens: Vec < Token > ) -> FFIDecl {
     let mut p = Parser::new(tokens);
-    p.parse_ffi()
+    p . parse_ffi()
 }
 
-fn parse_unsafe(tokens: Vec<Token>) -> UnsafeBlock {
+fn parse_unsafe(tokens: Vec < Token > ) -> UnsafeBlock {
     let mut p = Parser::new(tokens);
-    p.parse_unsafe()
+    p . parse_unsafe()
 }
 
-fn parse_type(tokens: Vec<Token>) -> TypeExpr {
+fn parse_type(tokens: Vec < Token > ) -> TypeExpr {
     let mut p = Parser::new(tokens);
-    p.parse_type()
+    p . parse_type()
 }
 
-fn parse_var_decl(tokens: Vec<Token>) -> VarDecl {
+fn parse_var_decl(tokens: Vec < Token > ) -> VarDecl {
     let mut p = Parser::new(tokens);
-    p.parse_var_decl()
+    p . parse_var_decl()
 }
 
-fn synchronize(tokens: Vec<Token>) -> Vec<Token> {
+fn synchronize(tokens: Vec < Token > ) -> Vec < Token > {
     let mut p = Parser::new(tokens);
-    p.synchronize();
-    p.tokens
+    p . synchronize();
+    p . tokens
 }

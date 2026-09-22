@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/baluac", "crates/blpkg"]
+members = ["crates/baluac", "crates/blpkg", "tools/balua-fmt", "tools/balua-test"]
 resolver = "2"
 
 [workspace.package]

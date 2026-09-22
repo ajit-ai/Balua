@@ -1,8 +1,21 @@
 // std::core — no_std core (Section 6.1)
 module std::core {
-    pub enum Option<T> { Some(T), None }
-    pub enum Result<T, E> { Ok(T), Err(E) }
-    pub fn panic(msg: str) -> ! { loop {} }
-    pub macro panic!(...) { std::core::panic("panic") }
-    pub macro assert!(cond: bool) { if !cond { panic("assertion failed") } }
+    pub enum Option < T > {
+        Some(T), None
+}
+    pub enum Result < T, E > {
+        Ok(T), Err(E)
+}
+    pub fn panic(msg: str) -> ! {
+        loop {
+        }
+    }
+    pub macro panic ! (... ) {
+        std::core::panic("panic")
+}
+    pub macro assert ! (cond: bool) {
+        if ! cond {
+            panic("assertion failed")
+}
+    }
 }

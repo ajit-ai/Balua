@@ -1,21 +1,46 @@
 // std::hal::fpga — FPGA HAL (Section 4.1)
 module std::hal::fpga {
-    pub fn load_bitstream(path: str) / IO -> Result<(), str> { Ok(()) }
-    pub fn partial_reconfigure(path: str) / IO -> Result<(), str> { Ok(()) }
+    pub fn load_bitstream(path: str) / IO -> Result < (), str > {
+        Ok(())
+}
+    pub fn partial_reconfigure(path: str) / IO -> Result < (), str > {
+        Ok(())
+}
 
-    pub fn axi_read(addr: u64) -> u32 { 0 }
-    pub fn axi_write(addr: u64, val: u32) / IO { }
-    pub fn axi_stream_in<T>(chan: u32) -> T { panic!("sim fallback") }
-    pub fn axi_stream_out<T>(chan: u32, val: T) / IO { }
-
-    pub struct BRAM<T, const N: usize> { data: [T; N] }
-    pub struct URAM<T, const N: usize> { data: [T; N] }
-    impl<T, const N: usize> BRAM<T, N> {
-        pub fn new() -> Self where T: Default + Copy { Self { data: [T::default(); N] } }
+    pub fn axi_read(addr: u64) -> u32 {
+        0
+}
+    pub fn axi_write(addr: u64, val: u32) / IO {
+    }
+    pub fn axi_stream_in < T > (chan: u32) -> T {
+        panic ! ("sim fallback")
+}
+    pub fn axi_stream_out < T > (chan: u32, val: T) / IO {
     }
 
-    pub fn dsp_multiply_accumulate(a: i32, b: i32, acc: i32) -> i32 { a * b + acc }
+    pub struct BRAM < T, const N: usize > {
+        data: [T;
+        N]
+}
+    pub struct URAM < T, const N: usize > {
+        data: [T;
+        N]
+}
+    impl < T, const N: usize > BRAM < T, N > {
+        pub fn new() -> Self where T: Default + Copy {
+            Self {
+                data: [T::default();
+                N]
+}
+        }
+    }
 
-    pub fn pcie_dma_read(dst: *mut u8, len: usize) / IO { }
-    pub fn pcie_dma_write(src: *const u8, len: usize) / IO { }
+    pub fn dsp_multiply_accumulate(a: i32, b: i32, acc: i32) -> i32 {
+        a * b + acc
+}
+
+    pub fn pcie_dma_read(dst: * mut u8, len: usize) / IO {
+    }
+    pub fn pcie_dma_write(src: * const u8, len: usize) / IO {
+    }
 }

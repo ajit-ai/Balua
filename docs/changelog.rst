@@ -8,6 +8,10 @@ scaffold milestones, not verified artifacts — see :doc:`roadmap`.
 Recent history
 --------------
 
+- M3 closeout (develop, this change) — ``balua-fmt``/``balua-test``
+  workspace tools, CLI + JSON schema freeze tests, fixed-seed fuzz smoke
+  and soak, deterministic GNU-linked executables, repo-wide format
+  dogfood, CI ``fmt``/``test-runner`` jobs.
 - ``2ce74c4`` — M2 safety-min fixes: module splice, attribute plumbing,
   exact heap matching, SCC loop analysis, tier-uniform enforcement,
   semantic double-record fix.

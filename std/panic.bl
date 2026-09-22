@@ -1,2 +1,7 @@
 // std::panic — Panic handler, backtraces, abort
-module std::panic { pub fn handler(msg: str) -> ! { loop {} } }
+module std::panic {
+    pub fn handler(msg: str) -> ! {
+        loop {
+        }
+    }
+}

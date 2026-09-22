@@ -2,23 +2,41 @@
 #![no_std]
 
 module kernel {
-    use std::hal::memory::{mmap, HeapAlloc};
+    use std::hal::memory::{
+        mmap, HeapAlloc
+};
 
-    struct PageAllocator { next: usize }
+    struct PageAllocator {
+        next: usize
+}
     impl PageAllocator {
-        fn alloc_page(&mut self) -> *mut u8 { let p = self.next as *mut u8; self.next += 4096; p }
+        fn alloc_page(& mut self) -> * mut u8 {
+            let p = self . next as * mut u8;
+            self . next += 4096;
+            p
+}
     }
 
-    struct Scheduler { tasks: [u32; 16] }
+    struct Scheduler {
+        tasks: [u32;
+        16]
+}
     impl Scheduler {
-        fn schedule(&mut self) { /* round-robin */ }
+        fn schedule(& mut self) {
+            /* round-robin */
+        }
     }
 
-    pub fn syscall_table(id: u32) -> i32 { 0 }
+    pub fn syscall_table(id: u32) -> i32 {
+        0
+}
 
     fn kmain() -> ! {
-        let mut alloc = PageAllocator { next: 0x100000 };
-        let page = alloc.alloc_page();
-        loop { }
+        let mut alloc = PageAllocator {
+            next: 0x100000
+};
+        let page = alloc . alloc_page();
+        loop {
+        }
     }
 }

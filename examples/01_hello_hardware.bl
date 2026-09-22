@@ -9,11 +9,12 @@ module main {
     fn main() -> i32 {
         println("Hello from Balua!");
         println("CPU cores: {}", cpu::core_count());
-        println("GPU available: {}", true); // probe in real HAL
+        println("GPU available: {}", true);
+        // probe in real HAL
         println("NPU backend: {:?}", npu::detect_backend());
         println("FPGA bitstream loaded: {}", false);
         println("Quantum qubits: {}", 5);
         0
-    }
+}
 }
 // README: blpkg run — works on any host (simulation fallback)

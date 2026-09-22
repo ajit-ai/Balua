@@ -1,19 +1,20 @@
 // 06_quantum_grover — Grover's 4-qubit unstructured search (Section 11)
 module main {
-    use std::hal::quantum::{QubitArray, H, CNOT, measure};
+    use std::hal::quantum::{
+        QubitArray, H, CNOT, measure
+};
 
-    @hw::quantum(backend=openqasm3, qubits=5)
-    fn grover_search(oracle: QuantumOracle) -> MeasuredState {
+    @hw::quantum(backend = openqasm3, qubits = 5) fn grover_search(oracle: QuantumOracle) -> MeasuredState {
         let q = qubit[5];
         H(q);
         oracle(q);
         diffuse(q);
         measure(q)
-    }
+}
 
     fn main() -> i32 {
         println("Grover search — 4-qubit demo, emitted as OpenQASM 3.0");
         // blpkg build --target quantum:ibm:fake_manila
         0
-    }
+}
 }

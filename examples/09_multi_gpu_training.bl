@@ -1,17 +1,18 @@
 // 09_multi_gpu_training — Distributed SGD over 8 GPUs via NCCL (Section 11)
 module main {
-    use std::hal::gpu::{DeviceBuf, nccl_all_reduce};
+    use std::hal::gpu::{
+        DeviceBuf, nccl_all_reduce
+};
 
-    @hw::gpu(backend=cuda, sm=90)
-    kernel fn sgd_step(weights: &mut [f32], grads: &[f32], lr: f32, n: u32) -> void {
+    @hw::gpu(backend = cuda, sm = 90) kernel fn sgd_step(weights: & mut[f32], grads: & [f32], lr: f32, n: u32) -> void {
         let i = thread_id::x();
         weights[i] -= lr * grads[i];
     }
 
     fn main() -> i32 {
-        let mut weights = DeviceBuf::<f32>::alloc(1<<20);
-        println!("Training step on 8 GPUs — NCCL AllReduce (simulated)");
-        nccl_all_reduce(&mut weights);
+        let mut weights = DeviceBuf::< f32 > ::alloc(1 << 20);
+        println ! ("Training step on 8 GPUs — NCCL AllReduce (simulated)");
+        nccl_all_reduce(& mut weights);
         0
-    }
+}
 }

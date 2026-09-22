@@ -1,2 +1,5 @@
 // std::thread — spawn, join, park, ThreadLocal
-module std::thread { pub fn spawn(f: fn() -> void) {} }
+module std::thread {
+    pub fn spawn(f: fn() -> void) {
+    }
+}

@@ -1,5 +1,10 @@
 [package]
 name = "balua-test"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+description = "Balua test runner — compile-and-run harness asserting exit codes"
+
+[dependencies]
+baluac = { path = "../../crates/baluac" }
+anyhow.workspace = true
 
