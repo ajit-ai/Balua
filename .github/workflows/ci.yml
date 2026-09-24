@@ -55,6 +55,7 @@ jobs:
           install: mingw-w64-x86_64-llvm mingw-w64-x86_64-gcc
       - run: |
           echo "LLVM_SYS_221_PREFIX=$(llvm-config --prefix)" >> $GITHUB_ENV
+          echo "PATH=$(cygpath -u "$CARGO_HOME")/bin:$PATH" >> $GITHUB_ENV
           llvm-config --version
       - run: cargo build -p baluac --features llvm
       - run: cargo test -p baluac --features llvm --lib
